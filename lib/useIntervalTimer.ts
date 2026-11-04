@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { cues, unlockAudio } from "@/lib/audio";
 
 export type Status = "idle" | "running" | "paused" | "done";
-export type Phase = "work" | "rest";
+export type Phase = "prep" | "work" | "rest";
 export interface Snap { status: Status; phase: Phase; set: number; remainingMs: number }
-interface Cfg { work: number; rest: number; sets: number; sound: boolean }
+interface Cfg { work: number; rest: number; sets: number; prep: number; sound: boolean }
 
 export function useIntervalTimer(cfg: Cfg) {
   const initial: Snap = { status: "idle", phase: "work", set: 1, remainingMs: cfg.work * 1000 };
@@ -23,6 +23,8 @@ export function useIntervalTimer(cfg: Cfg) {
     unlockAudio();
     let s = snapRef.current;
     if (s.status === "done") s = { status: "idle", phase: "work", set: 1, remainingMs: cfgRef.current.work * 1000 };
+    // First press from idle: a short get-ready lead-in so you can get into position.
+    if (s.status === "idle" && cfgRef.current.prep > 0) s = { ...s, phase: "prep", remainingMs: cfgRef.current.prep * 1000 };
     endRef.current = Date.now() + s.remainingMs;
     lastSecRef.current = Math.ceil(s.remainingMs / 1000);
     commit({ ...s, status: "running" });
@@ -58,12 +60,17 @@ export function useIntervalTimer(cfg: Cfg) {
 
       // Phase finished.
       const begin = (phase: Phase, set: number) => {
-        const dur = (phase === "work" ? c.work : c.rest) * 1000;
+        const dur = (phase === "work" ? c.work : phase === "rest" ? c.rest : c.prep) * 1000;
         endRef.current = Date.now() + dur;
         lastSecRef.current = Math.ceil(dur / 1000);
         commit({ status: "running", phase, set, remainingMs: dur });
       };
 
+      if (s.phase === "prep") {
+        if (c.sound) cues.phase();
+        begin("work", 1);
+        return;
+      }
       if (s.phase === "work" && s.set >= c.sets) {
         if (c.sound) cues.done();
         commit({ status: "done", phase: "work", set: c.sets, remainingMs: 0 });

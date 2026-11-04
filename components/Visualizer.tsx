@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
-import { VIEW, poseAt, solve, type Motion, type Pose, type Pt } from "@/lib/rig";
+import { VIEW, angDiff, poseAt, solve, type Motion, type Pose, type Pt } from "@/lib/rig";
 
 const pts = (...p: Pt[]) => p.map((q) => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(" ");
 
@@ -9,8 +9,7 @@ function Figure({ pose, motion, tone, ghost = false }: { pose: Pose; motion: Mot
   const back = ghost ? "stroke-white/15" : "stroke-zinc-500";
   const torso = ghost ? "stroke-white/15" : "stroke-zinc-100";
   const front = ghost ? "stroke-white/15" : tone;
-  const w = ghost ? 5 : 6;
-  const common = { fill: "none", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: w } as const;
+  const common = { fill: "none", strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: ghost ? 5 : 6 } as const;
   return (
     <g>
       <polyline {...common} className={back} points={pts(s.hip, s.kneeB, s.ankleB)} />
@@ -23,28 +22,50 @@ function Figure({ pose, motion, tone, ghost = false }: { pose: Pose; motion: Mot
   );
 }
 
-interface Props { motion: Motion; cycle: number; playing: boolean; resting: boolean; urgent: boolean }
+interface Props {
+  motion: Motion;
+  cycle: number;
+  playing: boolean; // advance the loop
+  hold: boolean; // glide back to the start pose and wait there
+  resting: boolean;
+  urgent: boolean;
+}
 
-export default function Visualizer({ motion, cycle, playing, resting, urgent }: Props) {
+export default function Visualizer({ motion, cycle, playing, hold, resting, urgent }: Props) {
   const uid = useId().replace(/:/g, "");
-  const [t, setT] = useState(0);
+  const [pose, setPose] = useState<Pose>(motion.keys[0]);
+  const live = useRef({ playing, hold });
+  useEffect(() => { live.current = { playing, hold }; });
 
+  // One loop owns time. The drawn pose chases the target pose with a critically
+  // damped glide, so pause / rest / resume never snap — they redirect from where
+  // the figure currently is.
   useEffect(() => {
-    if (!playing) return;
     let raf = 0;
     let last = performance.now();
+    let t = 0;
+    let shown: Pose = motion.keys[0];
     const loop = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      setT((p) => (p + dt / cycle) % 1);
+      const { playing: p, hold: h } = live.current;
+      if (h) t = 0;
+      else if (p) t = (t + dt / cycle) % 1;
+      const target = poseAt(motion.keys, t);
+      const k = 1 - Math.exp(-dt * 18);
+      let max = 0;
+      const next = shown.map((v, i) => {
+        const d = angDiff(target[i], v);
+        max = Math.max(max, Math.abs(d));
+        return v + d * k;
+      }) as unknown as Pose;
+      if (max > 0.02) { shown = next; setPose(next); }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, cycle]);
+  }, [motion, cycle]);
 
-  const shown = resting ? 0 : t;
-  const pose = poseAt(motion.keys, shown);
   const tone = urgent ? "stroke-warn" : resting ? "stroke-rest" : "stroke-work";
   const floor = VIEW.floor;
 
@@ -79,12 +100,9 @@ export default function Visualizer({ motion, cycle, playing, resting, urgent }: 
       )}
 
       {/* Target-position ghost for simple two-pose movements */}
-      {motion.keys.length === 2 && !resting && <Figure pose={motion.keys[1]} motion={motion} tone={tone} ghost />}
+      {motion.keys.length === 2 && !hold && <Figure pose={motion.keys[1]} motion={motion} tone={tone} ghost />}
 
-      <g
-        className={resting ? "opacity-60" : "opacity-100"}
-        style={{ transition: "opacity 200ms cubic-bezier(0.23, 1, 0.32, 1)" }}
-      >
+      <g className={resting ? "opacity-60" : "opacity-100"} style={{ transition: "opacity 200ms cubic-bezier(0.23, 1, 0.32, 1)" }}>
         <g filter={`url(#${uid}-glow)`} opacity="0.4"><Figure pose={pose} motion={motion} tone={tone} /></g>
         <Figure pose={pose} motion={motion} tone={tone} />
       </g>

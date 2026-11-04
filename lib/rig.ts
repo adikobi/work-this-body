@@ -51,6 +51,9 @@ export function solve(p: Pose, pin: Pin): Skeleton {
   };
 }
 
+/** Signed shortest rotation from b to a, in degrees. */
+export const angDiff = (a: number, b: number) => ((a - b + 540) % 360) - 180;
+
 /** Cyclic interpolation through keys (last key eases back to the first). */
 export function poseAt(keys: readonly Pose[], t: number): Pose {
   const n = keys.length;
@@ -60,5 +63,5 @@ export function poseAt(keys: readonly Pose[], t: number): Pose {
   const e = 0.5 - 0.5 * Math.cos(Math.PI * f); // sine ease-in-out
   const a = keys[i % n];
   const b = keys[(i + 1) % n];
-  return a.map((v, k) => v + (b[k] - v) * e) as unknown as Pose;
+  return a.map((v, k) => v + angDiff(b[k], v) * e) as unknown as Pose;
 }
