@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Workout from "@/components/Workout";
-import { byId, categories, exercises } from "@/lib/exercises";
+import { byId, categories, exercises, levelOrder, levels, type Level } from "@/lib/exercises";
 import { read, today, write } from "@/lib/storage";
 
 const pill =
@@ -9,10 +9,25 @@ const pill =
 const on = "bg-work/20 text-work";
 const off = "bg-white/10 text-zinc-100 hover:bg-white/15";
 
+type LevelFilter = Level | "all";
+
+function LevelChips({ value, onChange }: { value: LevelFilter; onChange: (l: LevelFilter) => void }) {
+  return (
+    <div className="flex gap-2" role="group" aria-label="Filter by difficulty">
+      {(["all", ...levelOrder] as const).map((l) => (
+        <button key={l} type="button" aria-pressed={value === l} onClick={() => onChange(l)} className={`${pill} min-h-9 px-3 text-xs ${value === l ? on : off}`}>
+          {l === "all" ? "All levels" : levels[l].label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function AppShell() {
   const [exId, setExId] = useState(exercises[0].id);
   const [open, setOpen] = useState<string[]>([exercises[0].cat]);
   const [done, setDone] = useState<string[]>([]);
+  const [level, setLevel] = useState<LevelFilter>("all");
   const exercise = byId(exId);
   const category = categories.find((c) => c.id === exercise.cat) ?? categories[0];
   const key = `wtb:done:${today()}`;
@@ -46,8 +61,10 @@ export default function AppShell() {
     });
   }, [key]);
 
-  const idx = exercises.findIndex((e) => e.id === exercise.id);
-  const next = exercises[idx + 1];
+  const visible = exercises.filter((e) => level === "all" || e.level === level);
+  const vi = visible.findIndex((e) => e.id === exercise.id);
+  const next = vi >= 0 ? visible[vi + 1] : undefined;
+  const cats = categories.filter((c) => visible.some((e) => e.cat === c.id));
   const toggleCat = (id: string) => setOpen((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
   const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label="completed today">✓</span> : null);
 
@@ -60,9 +77,10 @@ export default function AppShell() {
             work<span className="text-work">-this-</span>body
           </h1>
           <p className="mt-1 text-xs tabular-nums text-zinc-300">Today: {done.length} / {exercises.length} done</p>
+          <div className="mt-4"><LevelChips value={level} onChange={setLevel} /></div>
           <nav className="mt-5 space-y-1" aria-label="Exercises">
-            {categories.map((c) => {
-              const list = exercises.filter((e) => e.cat === c.id);
+            {cats.map((c) => {
+              const list = visible.filter((e) => e.cat === c.id);
               const isOpen = open.includes(c.id);
               return (
                 <div key={c.id}>
@@ -109,20 +127,21 @@ export default function AppShell() {
             </h1>
             <p className="text-xs tabular-nums text-zinc-300">Today {done.length}/{exercises.length}</p>
           </div>
+          <div className="no-scrollbar -mx-3 mb-2 overflow-x-auto px-3 pb-1"><LevelChips value={level} onChange={setLevel} /></div>
           <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-2">
-            {categories.map((c) => (
+            {cats.map((c) => (
               <button
                 key={c.id}
                 type="button"
                 className={`${pill} ${c.id === exercise.cat ? on : off}`}
-                onClick={() => select(exercises.find((e) => e.cat === c.id)?.id ?? exId)}
+                onClick={() => select(visible.find((e) => e.cat === c.id)?.id ?? exId)}
               >
                 {c.short}
               </button>
             ))}
           </div>
           <div className="no-scrollbar -mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-2">
-            {exercises.filter((e) => e.cat === exercise.cat).map((e) => (
+            {visible.filter((e) => e.cat === exercise.cat).map((e) => (
               <button key={e.id} type="button" className={`${pill} text-xs ${e.id === exId ? "bg-white/20 text-zinc-50" : off}`} onClick={() => select(e.id)}>
                 {tick(e.id)}
                 {e.name}
