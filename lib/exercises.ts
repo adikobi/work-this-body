@@ -1,9 +1,24 @@
 import type { Motion } from "./rig";
 
+export type Level = "easy" | "moderate" | "hard";
+export type Phase = "warmup" | "cooldown";
+
+export const levelOrder: Level[] = ["easy", "moderate", "hard"];
+export const levels: Record<Level, { label: string; chip: string }> = {
+  easy: { label: "Easy", chip: "bg-emerald-400/15 text-emerald-300" },
+  moderate: { label: "Moderate", chip: "bg-amber-400/15 text-amber-300" },
+  hard: { label: "Hard", chip: "bg-rose-400/15 text-rose-300" },
+};
+
 export interface Category { id: string; name: string; short: string; dot: string }
 export interface Exercise {
   id: string;
   cat: string;
+  level: Level;
+  /** Marks an exercise as a warm-up or cool-down option. */
+  phase?: Phase;
+  /** Categories this warm-up / cool-down suits. Omit = suits everything. */
+  suits?: string[];
   name: string;
   tagline: string;
   sets: number;
@@ -19,7 +34,9 @@ export interface Exercise {
 }
 
 export const categories: Category[] = [
+  { id: "warmup", name: "Warm-Up & Mobility", short: "Warm-Up", dot: "bg-yellow-300" },
   { id: "knee", name: "Knee & Leg Stability", short: "Knee & Leg", dot: "bg-lime-300" },
+  { id: "hike", name: "Hike Prep: Knee-Friendly", short: "Hike Prep", dot: "bg-emerald-300" },
   { id: "core", name: "Core & Pelvic Strength", short: "Core", dot: "bg-amber-300" },
   { id: "upper", name: "Upper Body & Chest Toning", short: "Upper Body", dot: "bg-sky-300" },
   { id: "posture", name: "Posture & Back Alignment", short: "Posture", dot: "bg-rose-300" },
@@ -29,12 +46,12 @@ export const categories: Category[] = [
   { id: "stretch", name: "Stretch & Recovery", short: "Stretch", dot: "bg-violet-300" },
 ];
 
-export const exercises: Exercise[] = [
+const raw: Exercise[] = [
   // ───────── Knee & Leg Stability ─────────
   {
-    id: "step-downs", cat: "knee", name: "Controlled Step-Downs",
+    id: "step-downs", cat: "knee", level: "moderate", name: "Controlled Step-Downs",
     tagline: "Eccentric control for the knee and hip.",
-    sets: 3, work: 40, rest: 20, cycle: 4, alternate: true,
+    sets: 4, work: 40, rest: 20, cycle: 4, alternate: true,
     muscles: { primary: ["Quadriceps", "Glute medius"], secondary: ["Glute max", "Calves", "Core"] },
     steps: [
       "Stand on a low step with one foot near the edge, arms forward for balance.",
@@ -50,9 +67,9 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "wall-sit", cat: "knee", name: "Single-Leg Wall Sit",
+    id: "wall-sit", cat: "knee", level: "hard", name: "Single-Leg Wall Sit",
     tagline: "Isometric quad endurance, one side at a time.",
-    sets: 3, work: 30, rest: 30, cycle: 5, hold: true, alternate: true,
+    sets: 4, work: 30, rest: 30, cycle: 5, hold: true, alternate: true,
     muscles: { primary: ["Quadriceps", "Glutes"], secondary: ["Hamstrings", "Calves", "Core"] },
     steps: [
       "Lean your back flat against a wall and walk the feet out until knees reach about 90°.",
@@ -68,9 +85,9 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "bulgarian", cat: "knee", name: "Bulgarian Split Squat",
+    id: "bulgarian", cat: "knee", level: "hard", name: "Bulgarian Split Squat",
     tagline: "Single-leg strength with a rear-foot rest.",
-    sets: 3, work: 40, rest: 20, cycle: 4, alternate: true,
+    sets: 4, work: 40, rest: 20, cycle: 4, alternate: true,
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Adductors", "Hamstrings", "Hip flexors"] },
     steps: [
       "Rest the top of one foot on a bench behind you; step the other foot well forward.",
@@ -86,9 +103,9 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "trail-balance", cat: "knee", name: "Trail Balance",
+    id: "trail-balance", cat: "knee", level: "moderate", name: "Trail Balance",
     tagline: "Single-leg hinge with a long trailing leg.",
-    sets: 3, work: 30, rest: 15, cycle: 5, hold: true, alternate: true,
+    sets: 4, work: 30, rest: 15, cycle: 5, hold: true, alternate: true,
     muscles: { primary: ["Glute medius", "Hamstrings"], secondary: ["Calves", "Foot stabilisers", "Spinal erectors"] },
     steps: [
       "Stand on one leg with a soft knee and arms by your sides.",
@@ -104,7 +121,7 @@ export const exercises: Exercise[] = [
   },
   // ───────── Core & Pelvic Strength ─────────
   {
-    id: "deadbug", cat: "core", name: "Deadbugs",
+    id: "deadbug", cat: "core", level: "moderate", name: "Deadbugs",
     tagline: "Anti-extension core control.",
     sets: 3, work: 40, rest: 20, cycle: 6,
     muscles: { primary: ["Transverse abdominis", "Rectus abdominis"], secondary: ["Obliques", "Hip flexors", "Pelvic floor"] },
@@ -126,7 +143,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "hollow", cat: "core", name: "Hollow Body Hold",
+    id: "hollow", cat: "core", level: "hard", name: "Hollow Body Hold",
     tagline: "Full-length tension from ribs to toes.",
     sets: 3, work: 20, rest: 20, cycle: 4, hold: true,
     muscles: { primary: ["Rectus abdominis", "Transverse abdominis"], secondary: ["Hip flexors", "Quads", "Serratus"] },
@@ -143,7 +160,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "bird-dog", cat: "core", name: "Bird-Dogs",
+    id: "bird-dog", cat: "core", level: "easy", name: "Bird-Dogs",
     tagline: "Spine-safe stability under asymmetric load.",
     sets: 3, work: 40, rest: 20, cycle: 6,
     muscles: { primary: ["Multifidus", "Glute max"], secondary: ["Deltoids", "Transverse abdominis", "Hamstrings"] },
@@ -166,7 +183,7 @@ export const exercises: Exercise[] = [
   },
   // ───────── Upper Body & Chest Toning ─────────
   {
-    id: "incline-pushup", cat: "upper", name: "Incline Push-Ups",
+    id: "incline-pushup", cat: "upper", level: "moderate", name: "Incline Push-Ups",
     tagline: "Press strength with a joint-friendly angle.",
     sets: 3, work: 40, rest: 25, cycle: 3,
     muscles: { primary: ["Pectoralis major", "Triceps"], secondary: ["Front deltoids", "Serratus", "Core"] },
@@ -184,7 +201,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "chest-squeeze", cat: "upper", name: "Chest Squeeze",
+    id: "chest-squeeze", cat: "upper", level: "easy", name: "Chest Squeeze",
     tagline: "Isometric palm press for the inner chest.",
     sets: 4, work: 20, rest: 15, cycle: 4, hold: true,
     muscles: { primary: ["Pectoralis major", "Pectoralis minor"], secondary: ["Front deltoids", "Serratus", "Triceps"] },
@@ -201,7 +218,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "scap-retraction", cat: "upper", name: "Scapular Retractions",
+    id: "scap-retraction", cat: "upper", level: "easy", name: "Scapular Retractions",
     tagline: "Wake up the mid-back to open the chest.",
     sets: 3, work: 40, rest: 15, cycle: 4,
     muscles: { primary: ["Rhomboids", "Middle trapezius"], secondary: ["Rear deltoids", "Lower traps"] },
@@ -219,7 +236,7 @@ export const exercises: Exercise[] = [
   },
   // ───────── Posture & Back Alignment ─────────
   {
-    id: "prone-ytw", cat: "posture", name: "Prone Y-T-W",
+    id: "prone-ytw", cat: "posture", level: "moderate", name: "Prone Y-T-W",
     tagline: "Lower-trap and rear-delt endurance.",
     sets: 3, work: 45, rest: 20, cycle: 9,
     muscles: { primary: ["Lower trapezius", "Rhomboids"], secondary: ["Rear deltoids", "Spinal erectors", "Rotator cuff"] },
@@ -240,7 +257,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "cobra", cat: "posture", name: "Cobra Holds",
+    id: "cobra", cat: "posture", level: "easy", name: "Cobra Holds",
     tagline: "Extend the spine and open the front body.",
     sets: 4, work: 20, rest: 15, cycle: 5, hold: true,
     muscles: { primary: ["Spinal erectors", "Glute max"], secondary: ["Lower traps", "Rear deltoids", "Abdominals (stretch)"] },
@@ -257,7 +274,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "towel-pulls", cat: "posture", name: "Towel Pulls",
+    id: "towel-pulls", cat: "posture", level: "easy", name: "Towel Pulls",
     tagline: "Band-free lat and mid-back activation.",
     sets: 3, work: 40, rest: 15, cycle: 4,
     muscles: { primary: ["Latissimus dorsi", "Middle trapezius"], secondary: ["Rear deltoids", "Biceps", "Rhomboids"] },
@@ -274,9 +291,9 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "reverse-lunge", cat: "knee", name: "Reverse Lunges",
+    id: "reverse-lunge", cat: "knee", level: "moderate", name: "Reverse Lunges",
     tagline: "Knee-friendly single-leg strength: the shin stays vertical.",
-    sets: 3, work: 40, rest: 20, cycle: 4, alternate: true,
+    sets: 4, work: 40, rest: 20, cycle: 4, alternate: true,
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Calves", "Core"] },
     steps: ["Stand tall with arms forward for balance.", "Step one foot back and lower until the front thigh is near parallel.", "Keep the front shin vertical and your torso upright.", "Push through the front heel to return. Alternate legs each rep."],
     cues: ["Shin stays vertical", "Back knee hovers", "Push through the heel"],
@@ -289,7 +306,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "sit-to-stand", cat: "knee", name: "Chair Sit-to-Stands",
+    id: "sit-to-stand", cat: "knee", level: "easy", name: "Chair Sit-to-Stands",
     tagline: "Everyday squat pattern with a tempo that protects the knee.",
     sets: 3, work: 40, rest: 20, cycle: 5,
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Core", "Calves"] },
@@ -305,22 +322,26 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "straight-leg-raise", cat: "knee", name: "Straight-Leg Raises",
-    tagline: "Quad activation without bending the knee.",
-    sets: 3, work: 40, rest: 20, cycle: 4, alternate: true,
+    id: "straight-leg-raise", cat: "knee", level: "easy", name: "Straight-Leg Raises",
+    tagline: "Quad activation without bending the knee, with a 2-second hold at the top.",
+    sets: 4, work: 40, rest: 20, cycle: 7, alternate: true,
     muscles: { primary: ["Quadriceps", "Hip flexors"], secondary: ["Core"] },
-    steps: ["Lie on your back, one knee bent with the foot flat, the other leg straight.", "Tighten the thigh of the straight leg so the knee locks out.", "Lift the leg to the height of the bent knee, keeping the toes pointing up.", "Lower slowly. Switch legs each set."],
-    cues: ["Knee fully locked", "Lower back flat", "Slow lowering"],
+    steps: ["Lie on your back, one knee bent with the foot flat, the other leg straight.", "Tighten the thigh of the straight leg so the knee locks out.", "Lift the leg to the height of the bent knee, toes pointing up.", "Hold at the top for 2 seconds, keeping the thigh tight and the knee locked.", "Lower slowly over 3 seconds. Switch legs each set."],
+    cues: ["Knee fully locked", "Pause 2s at the top", "Lower back flat"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
+      // down → lift → hold (two segments at the top) → lower → short rest
       keys: [
         [-90, 90, 90, 150, 20, 90, 90, 90, 90],
         [-90, 135, 135, 150, 20, 90, 90, 90, 90],
+        [-90, 135, 135, 150, 20, 90, 90, 90, 90],
+        [-90, 135, 135, 150, 20, 90, 90, 90, 90],
+        [-90, 90, 90, 150, 20, 90, 90, 90, 90],
       ],
     },
   },
   {
-    id: "plank", cat: "core", name: "Forearm Plank",
+    id: "plank", cat: "core", level: "moderate", name: "Forearm Plank",
     tagline: "The reference isometric for the whole trunk.",
     sets: 3, work: 30, rest: 20, cycle: 4, hold: true,
     muscles: { primary: ["Transverse abdominis", "Rectus abdominis"], secondary: ["Glutes", "Shoulders", "Quads"] },
@@ -335,7 +356,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "mountain-climbers", cat: "core", name: "Mountain Climbers",
+    id: "mountain-climbers", cat: "core", level: "hard", name: "Mountain Climbers",
     tagline: "Core control with a conditioning edge.",
     sets: 3, work: 30, rest: 20, cycle: 2.4,
     muscles: { primary: ["Rectus abdominis", "Hip flexors"], secondary: ["Shoulders", "Quads", "Obliques"] },
@@ -352,7 +373,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "bicycle-crunch", cat: "core", name: "Bicycle Crunches",
+    id: "bicycle-crunch", cat: "core", level: "moderate", name: "Bicycle Crunches",
     tagline: "Rotational core work with a long lever.",
     sets: 3, work: 40, rest: 20, cycle: 3,
     muscles: { primary: ["Rectus abdominis", "Obliques"], secondary: ["Hip flexors"] },
@@ -367,7 +388,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "knee-pushup", cat: "upper", name: "Knee Push-Ups",
+    id: "knee-pushup", cat: "upper", level: "easy", name: "Knee Push-Ups",
     tagline: "Build push-up strength with a shorter lever.",
     sets: 3, work: 40, rest: 25, cycle: 3,
     muscles: { primary: ["Pectoralis major", "Triceps"], secondary: ["Front deltoids", "Serratus", "Core"] },
@@ -382,7 +403,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "shoulder-taps", cat: "upper", name: "Shoulder Taps",
+    id: "shoulder-taps", cat: "upper", level: "moderate", name: "Shoulder Taps",
     tagline: "Anti-rotation stability over a high plank.",
     sets: 3, work: 30, rest: 20, cycle: 4,
     muscles: { primary: ["Obliques", "Deltoids"], secondary: ["Pectorals", "Serratus", "Glutes"] },
@@ -399,7 +420,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "superman", cat: "posture", name: "Superman Lifts",
+    id: "superman", cat: "posture", level: "easy", name: "Superman Lifts",
     tagline: "Back-extensor endurance without loading the spine.",
     sets: 3, work: 30, rest: 20, cycle: 4,
     muscles: { primary: ["Spinal erectors", "Glute max"], secondary: ["Rear deltoids", "Hamstrings"] },
@@ -414,7 +435,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "reverse-plank", cat: "posture", name: "Reverse Plank",
+    id: "reverse-plank", cat: "posture", level: "moderate", name: "Reverse Plank",
     tagline: "Open the chest and strengthen the whole back line.",
     sets: 3, work: 25, rest: 20, cycle: 4, hold: true,
     muscles: { primary: ["Glute max", "Hamstrings"], secondary: ["Rear deltoids", "Triceps", "Spinal erectors"] },
@@ -429,7 +450,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "good-morning", cat: "posture", name: "Hip Hinge Good Mornings",
+    id: "good-morning", cat: "posture", level: "easy", name: "Hip Hinge Good Mornings",
     tagline: "Learn to bend from the hips, not the spine.",
     sets: 3, work: 40, rest: 20, cycle: 4,
     muscles: { primary: ["Hamstrings", "Spinal erectors"], secondary: ["Glute max", "Core"] },
@@ -444,7 +465,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "glute-bridge", cat: "hips", name: "Glute Bridge",
+    id: "glute-bridge", cat: "hips", level: "easy", name: "Glute Bridge",
     tagline: "The foundation hip-extension drill.",
     sets: 3, work: 40, rest: 20, cycle: 4,
     muscles: { primary: ["Glute max", "Hamstrings"], secondary: ["Core", "Adductors"] },
@@ -459,9 +480,9 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "single-leg-bridge", cat: "hips", name: "Single-Leg Glute Bridge",
+    id: "single-leg-bridge", cat: "hips", level: "moderate", name: "Single-Leg Glute Bridge",
     tagline: "Hip strength and pelvic control on one side.",
-    sets: 3, work: 30, rest: 20, cycle: 4, alternate: true,
+    sets: 4, work: 30, rest: 20, cycle: 4, alternate: true,
     muscles: { primary: ["Glute max", "Glute medius"], secondary: ["Hamstrings", "Core"] },
     steps: ["Set up for a bridge, then extend one leg straight, thigh level with the other.", "Press through the planted heel and lift your hips.", "Keep your pelvis level; don't let it twist.", "Lower slowly. Switch legs each set."],
     cues: ["Pelvis level", "Heel pressing down", "Slow lowering"],
@@ -474,7 +495,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "donkey-kick", cat: "hips", name: "Donkey Kicks",
+    id: "donkey-kick", cat: "hips", level: "easy", name: "Donkey Kicks",
     tagline: "Glute isolation from a stable quadruped base.",
     sets: 3, work: 40, rest: 20, cycle: 5,
     muscles: { primary: ["Glute max"], secondary: ["Hamstrings", "Core"] },
@@ -491,7 +512,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "bodyweight-squat", cat: "hips", name: "Bodyweight Squats",
+    id: "bodyweight-squat", cat: "hips", level: "moderate", name: "Bodyweight Squats",
     tagline: "Strong hips and legs, the foundation lift.",
     sets: 3, work: 40, rest: 20, cycle: 4,
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Adductors", "Core"] },
@@ -506,7 +527,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "arm-circles", cat: "shoulder", name: "Arm Circles",
+    id: "arm-circles", cat: "shoulder", level: "easy", phase: "warmup", suits: ["upper", "shoulder", "posture", "core"], name: "Arm Circles",
     tagline: "Warm up the shoulder joint through its full range.",
     sets: 3, work: 30, rest: 15, cycle: 3,
     muscles: { primary: ["Deltoids", "Rotator cuff"], secondary: ["Upper traps", "Serratus"] },
@@ -523,7 +544,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "wall-angels", cat: "shoulder", name: "Wall Angels",
+    id: "wall-angels", cat: "shoulder", level: "easy", name: "Wall Angels",
     tagline: "Active overhead mobility with the back supported.",
     sets: 3, work: 40, rest: 15, cycle: 5,
     muscles: { primary: ["Lower trapezius", "Serratus"], secondary: ["Rhomboids", "Deltoids"] },
@@ -539,7 +560,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "overhead-reach", cat: "shoulder", name: "Overhead Reaches",
+    id: "overhead-reach", cat: "shoulder", level: "easy", name: "Overhead Reaches",
     tagline: "Full flexion mobility with a gentle lat stretch.",
     sets: 3, work: 30, rest: 15, cycle: 5,
     muscles: { primary: ["Anterior deltoids", "Serratus"], secondary: ["Lats", "Triceps"] },
@@ -554,7 +575,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "doorway-chest", cat: "shoulder", name: "Doorway Chest Opener",
+    id: "doorway-chest", cat: "shoulder", level: "easy", name: "Doorway Chest Opener",
     tagline: "Counter the desk slouch by opening the front of the shoulder.",
     sets: 3, work: 30, rest: 10, cycle: 6, hold: true,
     muscles: { primary: ["Pectoralis major", "Anterior deltoids"], secondary: ["Biceps", "Pectoralis minor"] },
@@ -570,7 +591,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "high-knees", cat: "cardio", name: "High Knees",
+    id: "high-knees", cat: "cardio", level: "moderate", phase: "warmup", suits: ["hips", "cardio"], name: "High Knees",
     tagline: "Fast, light cardio that fires up the hips.",
     sets: 4, work: 30, rest: 20, cycle: 1.2,
     muscles: { primary: ["Hip flexors", "Quadriceps"], secondary: ["Calves", "Core"] },
@@ -585,7 +606,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "butt-kicks", cat: "cardio", name: "Butt Kicks",
+    id: "butt-kicks", cat: "cardio", level: "easy", phase: "warmup", suits: ["hips", "cardio"], name: "Butt Kicks",
     tagline: "Dynamic hamstring warm-up that raises your heart rate.",
     sets: 4, work: 30, rest: 20, cycle: 1.2,
     muscles: { primary: ["Hamstrings"], secondary: ["Calves", "Glutes"] },
@@ -600,7 +621,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "shadow-boxing", cat: "cardio", name: "Shadow Boxing",
+    id: "shadow-boxing", cat: "cardio", level: "moderate", name: "Shadow Boxing",
     tagline: "Rhythmic full-body cardio with punches.",
     sets: 4, work: 40, rest: 20, cycle: 2.4,
     muscles: { primary: ["Deltoids", "Triceps"], secondary: ["Core", "Calves", "Glutes"] },
@@ -617,7 +638,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "marches", cat: "cardio", name: "Standing Marches",
+    id: "marches", cat: "cardio", level: "easy", phase: "warmup", name: "Standing Marches",
     tagline: "A low-impact way to raise your heart rate.",
     sets: 3, work: 40, rest: 20, cycle: 3,
     muscles: { primary: ["Hip flexors", "Quadriceps"], secondary: ["Core", "Calves"] },
@@ -632,7 +653,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "hip-flexor-stretch", cat: "stretch", name: "Half-Kneeling Hip Flexor Stretch",
+    id: "hip-flexor-stretch", cat: "stretch", level: "easy", phase: "cooldown", suits: ["knee", "hike", "hips", "core", "cardio"], name: "Half-Kneeling Hip Flexor Stretch",
     tagline: "Lengthen the front of the hip after sitting or squatting.",
     sets: 2, work: 30, rest: 10, cycle: 8, hold: true, alternate: true,
     muscles: { primary: ["Hip flexors", "Quadriceps"], secondary: ["Glutes", "Abdominals"] },
@@ -647,7 +668,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "childs-pose", cat: "stretch", name: "Child's Pose",
+    id: "childs-pose", cat: "stretch", level: "easy", phase: "cooldown", suits: ["core", "posture", "upper", "shoulder", "hips"], name: "Child's Pose",
     tagline: "Gently stretch the back, hips and shoulders.",
     sets: 2, work: 30, rest: 10, cycle: 8, hold: true,
     muscles: { primary: ["Spinal erectors", "Lats"], secondary: ["Glutes", "Shoulders"] },
@@ -662,7 +683,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "quad-stretch", cat: "stretch", name: "Standing Quad Stretch",
+    id: "quad-stretch", cat: "stretch", level: "easy", phase: "cooldown", suits: ["knee", "hike", "hips", "cardio"], name: "Standing Quad Stretch",
     tagline: "Release tight thighs after leg work.",
     sets: 2, work: 30, rest: 10, cycle: 8, hold: true, alternate: true,
     muscles: { primary: ["Quadriceps", "Hip flexors"], secondary: ["Calves", "Core"] },
@@ -677,7 +698,7 @@ export const exercises: Exercise[] = [
     },
   },
   {
-    id: "forward-fold", cat: "stretch", name: "Standing Forward Fold",
+    id: "forward-fold", cat: "stretch", level: "easy", phase: "cooldown", suits: ["knee", "hike", "hips", "posture", "core", "cardio"], name: "Standing Forward Fold",
     tagline: "Release the hamstrings and lower back.",
     sets: 2, work: 30, rest: 10, cycle: 8, hold: true,
     muscles: { primary: ["Hamstrings", "Spinal erectors"], secondary: ["Calves", "Glutes"] },
@@ -691,6 +712,337 @@ export const exercises: Exercise[] = [
       ],
     },
   },
+  // ───────── Added: easier knee work ─────────
+  {
+    id: "wall-sit-double", cat: "knee", level: "easy", name: "Wall Sit",
+    tagline: "Two-legged isometric quad strength: the stepping stone to the single-leg version.",
+    sets: 3, work: 30, rest: 30, cycle: 5, hold: true,
+    muscles: { primary: ["Quadriceps", "Glutes"], secondary: ["Hamstrings", "Calves", "Core"] },
+    steps: [
+      "Lean your back flat against a wall, feet hip-width apart and about two foot-lengths out.",
+      "Slide down only to a shallow bend (around 45–60°). Go deeper only when it stays pain-free.",
+      "Hold with your weight in your heels and your knees in line with your toes.",
+      "Press up the wall to stand and rest. Work toward 90° over the weeks.",
+    ],
+    cues: ["Shallow is fine", "Weight in the heels", "Breathe out, don't brace"],
+    motion: {
+      pin: { joint: "ankleF", x: 88, y: 128 },
+      props: [{ t: "line", x1: 63, y1: 14, x2: 63, y2: 128 }],
+      keys: [[180, 50, 0, 50, 0, 60, 90, 60, 90], [180, 62, 0, 62, 0, 60, 90, 60, 90]],
+    },
+  },
+  {
+    id: "calf-raise", cat: "knee", level: "easy", name: "Slow Calf Raises",
+    tagline: "Strong calves share the load with the knee, especially on descents.",
+    sets: 3, work: 40, rest: 20, cycle: 6,
+    muscles: { primary: ["Gastrocnemius", "Soleus"], secondary: ["Foot stabilisers", "Glutes"] },
+    steps: [
+      "Stand tall with your fingertips on a wall or chair for balance.",
+      "Rise onto the balls of your feet over 2 seconds.",
+      "Pause for 1 second at the top.",
+      "Lower your heels over 3 seconds. When this is easy, progress to one leg at a time.",
+    ],
+    cues: ["Straight up, don't roll out", "Pause at the top", "Three seconds down"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      props: [{ t: "line", x1: 132, y1: 14, x2: 132, y2: 128 }],
+      keys: [[180, 10, -10, 10, -10, 80, 90, 80, 90], [180, 0, 0, 0, 0, 80, 90, 80, 90]],
+    },
+  },
+  {
+    id: "quad-set", cat: "knee", level: "easy", name: "Quad Sets",
+    tagline: "The gentlest way to wake the thigh muscle: no movement at the knee.",
+    sets: 4, work: 30, rest: 15, cycle: 5, hold: true, alternate: true,
+    muscles: { primary: ["Quadriceps"], secondary: ["Hip flexors"] },
+    steps: [
+      "Lie on your back, one knee bent with the foot flat, the other leg straight. A rolled towel under the straight knee is optional.",
+      "Tighten the thigh of the straight leg and press the back of the knee down.",
+      "Hold the squeeze for 5 seconds, then relax fully for a moment. Repeat for the whole set.",
+      "Switch legs each set.",
+    ],
+    cues: ["Press the knee down", "Toes pulled back", "Breathe normally"],
+    motion: {
+      pin: { joint: "hip", x: 110, y: 124 },
+      keys: [[-90, 90, 90, 150, 20, 90, 90, 90, 90], [-90, 86, 86, 150, 20, 90, 90, 90, 90]],
+    },
+  },
+  {
+    id: "heel-slide", cat: "knee", level: "easy", name: "Heel Slides",
+    tagline: "Gentle knee bending with the floor taking your weight.",
+    sets: 4, work: 40, rest: 20, cycle: 5, alternate: true,
+    muscles: { primary: ["Hamstrings", "Quadriceps"], secondary: ["Hip flexors", "Calves"] },
+    steps: [
+      "Lie on your back with both legs straight.",
+      "Slide one heel slowly toward your hips, bending the knee as far as is comfortable.",
+      "Pause, then slide the heel back out until the leg is straight.",
+      "Stay in a pain-free range. Switch legs each set.",
+    ],
+    cues: ["Slow and smooth", "Heel stays on the floor", "Stop before it pinches"],
+    motion: {
+      pin: { joint: "hip", x: 110, y: 124 },
+      keys: [[-90, 90, 90, 150, 20, 90, 90, 90, 90], [-90, 150, 20, 150, 20, 90, 90, 90, 90]],
+    },
+  },
+  {
+    id: "mini-squat", cat: "knee", level: "easy", name: "Mini Squats",
+    tagline: "A shallow, comfortable squat to groove the pattern before going deeper.",
+    sets: 3, work: 40, rest: 20, cycle: 5,
+    muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Calves", "Core"] },
+    steps: [
+      "Stand with feet hip-width apart, arms forward. Hold a counter if you need it.",
+      "Sit your hips back and bend the knees only a quarter of the way down.",
+      "Keep your heels down and your knees pointing the same way as your toes.",
+      "Stand up by pressing through the whole foot.",
+    ],
+    cues: ["Quarter depth", "Heels down", "Knees follow toes"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      keys: [[180, 0, 0, 0, 0, 85, 90, 85, 90], [172, 42, -14, 42, -14, 88, 90, 88, 90]],
+    },
+  },
+  // ───────── Added: Hike Prep (descents) ─────────
+  {
+    id: "low-step-down", cat: "hike", level: "easy", name: "Low Step-Downs",
+    tagline: "The descent muscle-pattern at a small, forgiving height.",
+    sets: 4, work: 40, rest: 20, cycle: 6, alternate: true,
+    muscles: { primary: ["Quadriceps", "Glute medius"], secondary: ["Calves", "Glute max", "Core"] },
+    steps: [
+      "Stand on a low step (a thick book or the bottom stair works) near the edge, holding a rail or wall.",
+      "Shift your weight onto the step leg and slowly lower the other heel toward the floor over 3 seconds.",
+      "Tap the floor lightly. Don't put weight on it.",
+      "Press through the step heel to stand tall. Switch legs each set.",
+    ],
+    cues: ["Three seconds down", "Knee over second toe", "Light tap only"],
+    motion: {
+      pin: { joint: "ankleF", x: 50, y: 120 },
+      props: [{ t: "rect", x: 14, y: 120, w: 44, h: 8 }],
+      keys: [[180, 0, 0, 40, 15, 40, 60, 40, 60], [174, 45, -25, 40, 15, 40, 60, 40, 60]],
+    },
+  },
+  {
+    id: "slow-sit-down", cat: "hike", level: "easy", name: "Slow Sit-Downs",
+    tagline: "Practise the slow, controlled lowering that downhill steps demand.",
+    sets: 3, work: 40, rest: 20, cycle: 8,
+    muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Calves", "Core"] },
+    steps: [
+      "Stand in front of a sturdy chair, feet hip-width apart.",
+      "Send your hips back and lower over 5 seconds, like a very slow elevator.",
+      "Touch the seat lightly, then stand back up (use your hands if you need to).",
+      "Keep your knees tracking over your toes the whole way down.",
+    ],
+    cues: ["Five seconds down", "Hips back first", "Knees over toes"],
+    motion: {
+      pin: { joint: "ankleF", x: 90, y: 128 },
+      props: [{ t: "rect", x: 44, y: 106, w: 32, h: 5 }, { t: "line", x1: 46, y1: 72, x2: 46, y2: 106 }, { t: "line", x1: 50, y1: 111, x2: 50, y2: 128 }, { t: "line", x1: 72, y1: 111, x2: 72, y2: 128 }],
+      keys: [[180, 0, 0, 0, 0, 85, 90, 85, 90], [170, 85, 0, 85, 0, 85, 90, 85, 90]],
+    },
+  },
+  {
+    id: "backward-steps", cat: "hike", level: "easy", name: "Slow Backward Steps",
+    tagline: "Soft, quiet foot placement with light, controlled load on the quads.",
+    sets: 3, work: 40, rest: 20, cycle: 3,
+    muscles: { primary: ["Quadriceps", "Calves"], secondary: ["Glutes", "Core", "Foot stabilisers"] },
+    steps: [
+      "Stand tall next to a wall or counter for support, with clear space behind you.",
+      "Step one foot back, landing softly on the toes, then lower the heel.",
+      "Shift your weight back, then bring the other foot to meet it.",
+      "Keep the steps small and quiet. Turn around and go the other way when you run out of room.",
+    ],
+    cues: ["Soft landing", "Small steps", "Stay tall"],
+    motion: {
+      pin: { joint: "hip", x: 100, y: 84 },
+      keys: [[180, 25, 5, -25, -25, -20, 10, 20, 10], [180, -25, -25, 25, 5, 20, 10, -20, 10]],
+    },
+  },
+  {
+    id: "single-leg-stand", cat: "hike", level: "easy", name: "Single-Leg Stand",
+    tagline: "Ankle, knee and hip control: the base of every steady descent.",
+    sets: 4, work: 30, rest: 15, cycle: 6, hold: true, alternate: true,
+    muscles: { primary: ["Glute medius", "Calves"], secondary: ["Foot stabilisers", "Quadriceps", "Core"] },
+    steps: [
+      "Stand next to a wall or counter, feet together.",
+      "Shift your weight onto one foot and lift the other a few inches.",
+      "Keep the standing knee soft, hips level and eyes on a fixed point.",
+      "Hold, then switch sides. Progress by closing your eyes or standing on a folded towel.",
+    ],
+    cues: ["Soft knee", "Hips level", "Eyes on a point"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      keys: [[180, 0, 0, 40, 0, 40, 50, 40, 50], [180, 0, 0, 55, 10, 40, 50, 40, 50]],
+    },
+  },
+  // ───────── Added: warm-ups ─────────
+  {
+    id: "ankle-circles", cat: "warmup", level: "easy", phase: "warmup", suits: ["knee", "hike", "hips", "cardio"], name: "Ankle Circles",
+    tagline: "Lubricate the ankle before any leg or hike-prep work.",
+    sets: 2, work: 30, rest: 10, cycle: 3, alternate: true,
+    muscles: { primary: ["Ankle stabilisers"], secondary: ["Calves", "Shins"] },
+    steps: [
+      "Stand tall near a wall for support and lift one foot just off the floor.",
+      "Draw slow, full circles with your toes, 15 seconds clockwise.",
+      "Reverse direction for the second half.",
+      "Switch legs for the next set.",
+    ],
+    cues: ["Big, slow circles", "Move only the ankle", "Stay tall"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      keys: [[180, 0, 0, 30, 10, 0, 0, 0, 0], [180, 0, 0, 30, -20, 0, 0, 0, 0]],
+    },
+  },
+  {
+    id: "leg-swings", cat: "warmup", level: "easy", phase: "warmup", suits: ["knee", "hike", "hips", "cardio"], name: "Leg Swings",
+    tagline: "Dynamic hip and hamstring warm-up with a light, easy swing.",
+    sets: 2, work: 30, rest: 10, cycle: 3, alternate: true,
+    muscles: { primary: ["Hip flexors", "Hamstrings"], secondary: ["Glutes", "Core"] },
+    steps: [
+      "Stand side-on to a wall, one hand resting on it.",
+      "Swing the outside leg forward and back like a pendulum.",
+      "Keep your torso tall and the swing small at first, growing it gradually.",
+      "Switch legs for the next set.",
+    ],
+    cues: ["Relaxed pendulum", "Tall torso", "Small to bigger"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      props: [{ t: "line", x1: 130, y1: 14, x2: 130, y2: 128 }],
+      keys: [[180, 0, 0, 45, 25, 70, 80, 70, 80], [180, 0, 0, -30, -45, 70, 80, 70, 80]],
+    },
+  },
+  {
+    id: "cat-cow", cat: "warmup", level: "easy", phase: "warmup", suits: ["core", "posture", "hips", "upper", "shoulder"], name: "Cat-Cow",
+    tagline: "Wake up the spine and shoulders before core, posture and upper-body work.",
+    sets: 2, work: 40, rest: 10, cycle: 6,
+    muscles: { primary: ["Spinal erectors", "Abdominals"], secondary: ["Shoulders", "Hips"] },
+    steps: [
+      "Start on hands and knees, wrists under shoulders, knees under hips.",
+      "Inhale and let your belly sink as you lift your chest and tailbone.",
+      "Exhale and round your back toward the ceiling, tucking your chin.",
+      "Flow slowly between the two with your breath.",
+    ],
+    cues: ["Move with the breath", "Whole spine moves", "Slow and smooth"],
+    motion: {
+      pin: { joint: "hip", x: 82, y: 98 },
+      keys: [[84, 0, -80, 0, -80, 0, 0, 0, 0], [96, 0, -80, 0, -80, 0, 0, 0, 0]],
+    },
+  },
+  {
+    id: "arm-swings", cat: "warmup", level: "easy", phase: "warmup", suits: ["upper", "shoulder", "posture", "cardio"], name: "Front-Back Arm Swings",
+    tagline: "Loosen the shoulders and chest before upper-body work.",
+    sets: 2, work: 30, rest: 10, cycle: 3,
+    muscles: { primary: ["Deltoids", "Pectoralis major"], secondary: ["Lats", "Upper back"] },
+    steps: [
+      "Stand tall with your feet hip-width apart.",
+      "Swing both arms forward and up, then back and down in a relaxed rhythm.",
+      "Let the swing grow gradually. Keep your ribs down.",
+      "Breathe out as the arms swing forward.",
+    ],
+    cues: ["Loose and relaxed", "Ribs down", "Grow the swing"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      keys: [[180, 0, 0, 0, 0, 110, 110, 110, 110], [180, 0, 0, 0, 0, -40, -40, -40, -40]],
+    },
+  },
+  // ───────── Added: cool-downs ─────────
+  {
+    id: "calf-stretch", cat: "stretch", level: "easy", phase: "cooldown", suits: ["knee", "hike", "cardio", "hips"], name: "Wall Calf Stretch",
+    tagline: "Release the calves after leg work and hikes.",
+    sets: 2, work: 30, rest: 10, cycle: 8, hold: true, alternate: true,
+    muscles: { primary: ["Gastrocnemius", "Soleus"], secondary: ["Achilles tendon"] },
+    steps: [
+      "Stand facing a wall, hands on it at chest height, one foot back.",
+      "Keep the back leg straight and press its heel into the floor.",
+      "Lean into the wall until you feel a stretch in the back calf.",
+      "Hold, then switch legs for the next set.",
+    ],
+    cues: ["Back heel down", "Back knee straight", "Toes point forward"],
+    motion: {
+      pin: { joint: "ankleB", x: 80, y: 128 },
+      props: [{ t: "line", x1: 142, y1: 14, x2: 142, y2: 128 }],
+      keys: [[180, 0, 0, 0, 0, 85, 90, 85, 90], [155, 50, 0, -25, -25, 90, 90, 90, 90]],
+    },
+  },
+  {
+    id: "hamstring-stretch", cat: "stretch", level: "easy", phase: "cooldown", suits: ["knee", "hike", "hips", "core", "cardio", "posture"], name: "Lying Hamstring Stretch",
+    tagline: "Back-supported and easy on the knee: lengthen the back of the thigh.",
+    sets: 2, work: 30, rest: 10, cycle: 8, hold: true, alternate: true,
+    muscles: { primary: ["Hamstrings"], secondary: ["Calves", "Glutes"] },
+    steps: [
+      "Lie on your back with one knee bent, foot flat. Loop a towel or strap round the other foot if you have one.",
+      "Raise the straight leg toward the ceiling until you feel a stretch behind the thigh.",
+      "Keep the lower back on the floor and the foot relaxed.",
+      "Hold, breathing slowly, then switch legs.",
+    ],
+    cues: ["Lower back stays down", "Gentle, no bouncing", "Breathe out"],
+    motion: {
+      pin: { joint: "hip", x: 110, y: 124 },
+      keys: [[-90, 90, 90, 150, 20, 90, 90, 90, 90], [-90, 172, 172, 150, 20, 90, 90, 90, 90]],
+    },
+  },
+  {
+    id: "knees-to-chest", cat: "stretch", level: "easy", phase: "cooldown", suits: ["core", "hips", "posture", "knee", "hike"], name: "Knees-to-Chest",
+    tagline: "Soothe the lower back and hips after core and leg work.",
+    sets: 2, work: 30, rest: 10, cycle: 8, hold: true,
+    muscles: { primary: ["Glutes", "Spinal erectors"], secondary: ["Hip extensors"] },
+    steps: [
+      "Lie on your back with both knees bent.",
+      "Draw your knees gently toward your chest and wrap your arms around your shins.",
+      "Let your lower back rest and your shoulders stay heavy on the floor.",
+      "Breathe slowly into your belly.",
+    ],
+    cues: ["Gentle pull", "Shoulders heavy", "Slow breaths"],
+    motion: {
+      pin: { joint: "hip", x: 110, y: 124 },
+      keys: [[-90, 150, 20, 150, 20, 90, 90, 90, 90], [-90, 230, 110, 230, 110, 100, 150, 100, 150]],
+    },
+  },
+  {
+    id: "triceps-stretch", cat: "stretch", level: "easy", phase: "cooldown", suits: ["upper", "shoulder", "posture"], name: "Overhead Triceps Stretch",
+    tagline: "Release the back of the arm and the shoulder after pressing work.",
+    sets: 2, work: 30, rest: 10, cycle: 8, hold: true, alternate: true,
+    muscles: { primary: ["Triceps"], secondary: ["Lats", "Rear deltoids"] },
+    steps: [
+      "Stand tall and raise one arm, bending the elbow so the hand drops behind your head.",
+      "Use the other hand to ease the elbow back gently.",
+      "Keep your ribs down and your neck long.",
+      "Hold, then switch arms for the next set.",
+    ],
+    cues: ["Ribs down", "Gentle pressure", "Neck long"],
+    motion: {
+      pin: { joint: "ankleF", x: 100, y: 128 },
+      keys: [[180, 0, 0, 0, 0, 10, 10, 10, 10], [180, 0, 0, 0, 0, 175, -20, 10, 10]],
+    },
+  },
+  {
+    id: "belly-breathing", cat: "stretch", level: "easy", phase: "cooldown", name: "Lying Belly Breathing",
+    tagline: "Slow your heart rate and let everything settle at the end.",
+    sets: 2, work: 45, rest: 10, cycle: 6, hold: true,
+    muscles: { primary: ["Diaphragm"], secondary: ["Pelvic floor", "Abdominals"] },
+    steps: [
+      "Lie on your back, knees bent, one hand on your belly.",
+      "Breathe in through your nose for about 4 seconds, letting the belly rise.",
+      "Breathe out slowly for about 6 seconds.",
+      "Let the shoulders, jaw and hands soften.",
+    ],
+    cues: ["Longer out than in", "Belly rises first", "Everything soft"],
+    motion: {
+      pin: { joint: "hip", x: 110, y: 124 },
+      keys: [[-90, 150, 20, 150, 20, 90, 90, 90, 90], [-88, 150, 20, 150, 20, 90, 90, 90, 90]],
+    },
+  },
 ];
+
+const catIndex = (id: string) => categories.findIndex((c) => c.id === id);
+
+/** Catalog order: category order, then easy → hard (stable within a level). */
+export const exercises: Exercise[] = [...raw].sort(
+  (a, b) => catIndex(a.cat) - catIndex(b.cat) || levelOrder.indexOf(a.level) - levelOrder.indexOf(b.level),
+);
+
+const suitsCat = (e: Exercise, cat: string) => !e.suits || e.suits.includes(cat);
+
+/** Up to `limit` warm-up and cool-down suggestions for an exercise's category, easiest first. */
+export function bookends(cat: string, limit = 3) {
+  const pick = (p: Phase) => exercises.filter((e) => e.phase === p && suitsCat(e, cat)).slice(0, limit);
+  return { warmup: pick("warmup"), cooldown: pick("cooldown") };
+}
 
 export const byId = (id: string) => exercises.find((e) => e.id === id) ?? exercises[0];
