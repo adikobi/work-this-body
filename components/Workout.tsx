@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import Visualizer from "@/components/Visualizer";
 import Guide from "@/components/Guide";
 import { PauseIcon, PlayIcon, ResetIcon, SoundOffIcon, SoundOnIcon } from "@/components/Icons";
-import type { Category, Exercise } from "@/lib/exercises";
+import { setMuted, unlockAudio } from "@/lib/audio";
+import { levels, type Category, type Exercise } from "@/lib/exercises";
 import { read, write } from "@/lib/storage";
 import { useIntervalTimer } from "@/lib/useIntervalTimer";
 
@@ -24,10 +25,22 @@ interface Props {
 
 export default function Workout({ exercise, category, next, onNext, onComplete }: Props) {
   const [sound, setSound] = useState(true);
-  useEffect(() => { if (read("wtb:sound") === "0") setSound(false); }, []);
-  const toggleSound = () => setSound((s) => { write("wtb:sound", s ? "0" : "1"); return !s; });
+  useEffect(() => {
+    const muted = read("wtb:sound") === "0";
+    setMuted(muted);
+    if (muted) setSound(false);
+  }, []);
+  const toggleSound = () => {
+    const next = !sound;
+    setSound(next);
+    setMuted(!next); // the audio layer owns muting
+    write("wtb:sound", next ? "1" : "0");
+    if (next) unlockAudio(); // un-muting is a user gesture: make sure the audio context is running
+  };
 
-  const t = useIntervalTimer({ work: exercise.work, rest: exercise.rest, sets: exercise.sets, prep: PREP, sound });
+  // `sound` is always true here on purpose: the timer keeps firing its cues and lib/audio silences them
+  // while muted, so un-muting works immediately and the timer never holds a stale mute value.
+  const t = useIntervalTimer({ work: exercise.work, rest: exercise.rest, sets: exercise.sets, prep: PREP, sound: true });
 
   const secs = Math.ceil(t.remainingMs / 1000);
   const total = (t.phase === "work" ? exercise.work : t.phase === "rest" ? exercise.rest : PREP) * 1000;
@@ -92,6 +105,9 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-zinc-300">
               <span className={`h-1.5 w-1.5 rounded-full ${category.dot}`} />
               {category.short}
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
+                {levels[exercise.level].label}
+              </span>
             </p>
             <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl lg:text-3xl">{exercise.name}</h2>
           </div>
