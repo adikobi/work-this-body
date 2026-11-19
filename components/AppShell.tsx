@@ -35,6 +35,12 @@ export default function AppShell() {
   const [open, setOpen] = useState<string[]>([exercises[0].cat]);
   const [done, setDone] = useState<string[]>([]);
   const [level, setLevel] = useState<LevelFilter>("all");
+  // While an exercise is running, the desktop catalog collapses to a slim bar so the stage gets the room.
+  const [training, setTraining] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const collapsed = training && !menuOpen;
+  useEffect(() => { if (!training) setMenuOpen(false); }, [training]);
+
   const exercise = content.byId(exId);
   const category = categories.find((c) => c.id === exercise.cat) ?? categories[0];
   const key = `wtb:done:${today()}`;
@@ -76,11 +82,27 @@ export default function AppShell() {
   const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label={t.completedToday}>✓</span> : null);
 
   return (
-    <div className="mx-auto min-h-dvh max-w-6xl px-3 pb-6 pt-4 sm:px-6 lg:grid lg:grid-cols-12 lg:gap-8 lg:pt-8">
+    <div
+      className={`mx-auto min-h-dvh px-3 pb-6 pt-4 sm:px-6 lg:pt-8 ${
+        collapsed ? "max-w-[1800px]" : "max-w-6xl lg:grid lg:grid-cols-12 lg:gap-8"
+      }`}
+    >
       {/* Desktop catalog */}
-      <aside className="hidden lg:col-span-3 lg:block">
+      <aside className={collapsed ? "hidden" : "hidden lg:col-span-3 lg:block"}>
         <div className="no-scrollbar sticky top-8 max-h-screen overflow-y-auto pb-8">
-          <h1 className="text-2xl"><Brand /></h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl"><Brand /></h1>
+            {training && (
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                aria-label={t.exercisesNav}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-zinc-100 hover:bg-white/15"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           <p className="mt-1 text-xs tabular-nums text-zinc-300">{t.todayLong(done.length, exercises.length)}</p>
           <div className="mt-3"><LocaleSwitcher /></div>
           <div className="mt-4"><LevelChips value={level} onChange={setLevel} /></div>
@@ -124,7 +146,21 @@ export default function AppShell() {
         </div>
       </aside>
 
-      <main className="lg:col-span-9">
+      {/* Desktop slim bar while training */}
+      {collapsed && (
+        <div className="mb-4 hidden items-center justify-between lg:flex">
+          <h1 className="text-xl"><Brand /></h1>
+          <div className="flex items-center gap-3">
+            <p className="text-xs tabular-nums text-zinc-300">{t.todayShort(done.length, exercises.length)}</p>
+            <LocaleSwitcher />
+            <button type="button" onClick={() => setMenuOpen(true)} className={`${pill} min-h-9 px-4 text-xs ${off}`}>
+              {t.exercisesNav}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <main className={collapsed ? "" : "lg:col-span-9"}>
         {/* Mobile catalog */}
         <div className="lg:hidden">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
@@ -164,6 +200,7 @@ export default function AppShell() {
           next={next}
           onNext={() => next && select(next.id)}
           onComplete={complete}
+          onTrainingChange={setTraining}
         />
       </main>
     </div>
