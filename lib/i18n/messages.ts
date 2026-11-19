@@ -83,6 +83,7 @@ const en: Messages = {
   summary: (sets, work, rest) => `${sets} × ${work}s · ${rest}s rest`,
 
   guide: {
+    startExercise: "Start exercise",
     alternate: "Alternate sides each set.",
     warmup: "Warm-up",
     cooldown: "Cool-down",
@@ -133,6 +134,7 @@ const he: Messages = {
   summary: (sets, work, rest) => `${sets} × ${work} שנ׳ · ${rest} שנ׳ מנוחה`,
 
   guide: {
+    startExercise: "התחילו בתרגיל",
     alternate: "החליפו צד בכל סט.",
     warmup: "חימום",
     cooldown: "קירור",
