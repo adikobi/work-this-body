@@ -1,7 +1,11 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import Brand from "@/components/Brand";
+import LocaleSwitcher from "@/components/LocaleSwitcher";
+import { useI18n } from "@/components/LocaleProvider";
 import Workout from "@/components/Workout";
-import { byId, categories, exercises, levelOrder, levels, type Level } from "@/lib/exercises";
+// Ids, order and categories never change with language, so logic uses the base data and display uses `content`.
+import { byId as baseById, levelOrder, type Level } from "@/lib/exercises";
 import { read, today, write } from "@/lib/storage";
 
 const pill =
@@ -12,11 +16,12 @@ const off = "bg-white/10 text-zinc-100 hover:bg-white/15";
 type LevelFilter = Level | "all";
 
 function LevelChips({ value, onChange }: { value: LevelFilter; onChange: (l: LevelFilter) => void }) {
+  const { t, content } = useI18n();
   return (
-    <div className="flex gap-2" role="group" aria-label="Filter by difficulty">
+    <div className="flex gap-2" role="group" aria-label={t.filterByDifficulty}>
       {(["all", ...levelOrder] as const).map((l) => (
         <button key={l} type="button" aria-pressed={value === l} onClick={() => onChange(l)} className={`${pill} min-h-9 px-3 text-xs ${value === l ? on : off}`}>
-          {l === "all" ? "All levels" : levels[l].label}
+          {l === "all" ? t.allLevels : content.levels[l].label}
         </button>
       ))}
     </div>
@@ -24,16 +29,18 @@ function LevelChips({ value, onChange }: { value: LevelFilter; onChange: (l: Lev
 }
 
 export default function AppShell() {
+  const { t, content } = useI18n();
+  const { exercises, categories } = content;
   const [exId, setExId] = useState(exercises[0].id);
   const [open, setOpen] = useState<string[]>([exercises[0].cat]);
   const [done, setDone] = useState<string[]>([]);
   const [level, setLevel] = useState<LevelFilter>("all");
-  const exercise = byId(exId);
+  const exercise = content.byId(exId);
   const category = categories.find((c) => c.id === exercise.cat) ?? categories[0];
   const key = `wtb:done:${today()}`;
 
   const select = useCallback((id: string, updateHash = true) => {
-    const ex = byId(id);
+    const ex = baseById(id);
     setExId(ex.id);
     setOpen((o) => (o.includes(ex.cat) ? o : [...o, ex.cat]));
     if (updateHash) window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${ex.id}`);
@@ -44,7 +51,7 @@ export default function AppShell() {
   useEffect(() => {
     const fromHash = () => {
       const h = window.location.hash.slice(1);
-      if (exercises.some((e) => e.id === h)) select(h, false);
+      if (baseById(h).id === h) select(h, false); // byId falls back to the first exercise for unknown ids
     };
     fromHash();
     window.addEventListener("hashchange", fromHash);
@@ -66,19 +73,18 @@ export default function AppShell() {
   const next = vi >= 0 ? visible[vi + 1] : undefined;
   const cats = categories.filter((c) => visible.some((e) => e.cat === c.id));
   const toggleCat = (id: string) => setOpen((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
-  const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label="completed today">✓</span> : null);
+  const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label={t.completedToday}>✓</span> : null);
 
   return (
     <div className="mx-auto min-h-dvh max-w-6xl px-3 pb-6 pt-4 sm:px-6 lg:grid lg:grid-cols-12 lg:gap-8 lg:pt-8">
       {/* Desktop catalog */}
       <aside className="hidden lg:col-span-3 lg:block">
         <div className="no-scrollbar sticky top-8 max-h-screen overflow-y-auto pb-8">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-zinc-50">
-            work<span className="text-work">-this-</span>body
-          </h1>
-          <p className="mt-1 text-xs tabular-nums text-zinc-300">Today: {done.length} / {exercises.length} done</p>
+          <h1 className="text-2xl"><Brand /></h1>
+          <p className="mt-1 text-xs tabular-nums text-zinc-300">{t.todayLong(done.length, exercises.length)}</p>
+          <div className="mt-3"><LocaleSwitcher /></div>
           <div className="mt-4"><LevelChips value={level} onChange={setLevel} /></div>
-          <nav className="mt-5 space-y-1" aria-label="Exercises">
+          <nav className="mt-5 space-y-1" aria-label={t.exercisesNav}>
             {cats.map((c) => {
               const list = visible.filter((e) => e.cat === c.id);
               const isOpen = open.includes(c.id);
@@ -88,7 +94,7 @@ export default function AppShell() {
                     type="button"
                     onClick={() => toggleCat(c.id)}
                     aria-expanded={isOpen}
-                    className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-left text-xs font-semibold uppercase tracking-widest text-zinc-300 transition-colors duration-150 ease-snap hover:bg-white/5"
+                    className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-start text-xs font-semibold uppercase tracking-widest text-zinc-300 transition-colors duration-150 ease-snap hover:bg-white/5"
                   >
                     <span className={`h-1.5 w-1.5 rounded-full ${c.dot}`} />
                     <span className="flex-1">{c.name}</span>
@@ -102,7 +108,7 @@ export default function AppShell() {
                             type="button"
                             onClick={() => select(e.id)}
                             aria-current={e.id === exId}
-                            className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-left text-sm transition-[background-color,color] duration-150 ease-snap ${e.id === exId ? "bg-white/10 font-semibold text-zinc-50" : "text-zinc-200 hover:bg-white/5"}`}
+                            className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-start text-sm transition-[background-color,color] duration-150 ease-snap ${e.id === exId ? "bg-white/10 font-semibold text-zinc-50" : "text-zinc-200 hover:bg-white/5"}`}
                           >
                             {e.name}
                             {tick(e.id)}
@@ -121,11 +127,12 @@ export default function AppShell() {
       <main className="lg:col-span-9">
         {/* Mobile catalog */}
         <div className="lg:hidden">
-          <div className="mb-3 flex items-baseline justify-between">
-            <h1 className="font-display text-xl font-extrabold tracking-tight text-zinc-50">
-              work<span className="text-work">-this-</span>body
-            </h1>
-            <p className="text-xs tabular-nums text-zinc-300">Today {done.length}/{exercises.length}</p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+            <h1 className="text-xl"><Brand /></h1>
+            <div className="flex items-center gap-3">
+              <p className="text-xs tabular-nums text-zinc-300">{t.todayShort(done.length, exercises.length)}</p>
+              <LocaleSwitcher />
+            </div>
           </div>
           <div className="no-scrollbar -mx-3 mb-2 overflow-x-auto px-3 pb-1"><LevelChips value={level} onChange={setLevel} /></div>
           <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-2">

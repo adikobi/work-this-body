@@ -3,8 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import Visualizer from "@/components/Visualizer";
 import Guide from "@/components/Guide";
 import { PauseIcon, PlayIcon, ResetIcon, SoundOffIcon, SoundOnIcon } from "@/components/Icons";
+import { useI18n } from "@/components/LocaleProvider";
 import { setMuted, unlockAudio } from "@/lib/audio";
-import { levels, type Category, type Exercise } from "@/lib/exercises";
+import type { Category, Exercise } from "@/lib/exercises";
 import { read, write } from "@/lib/storage";
 import { useIntervalTimer } from "@/lib/useIntervalTimer";
 
@@ -24,6 +25,8 @@ interface Props {
 }
 
 export default function Workout({ exercise, category, next, onNext, onComplete }: Props) {
+  const { t: ui, content } = useI18n(); // `t` below is the interval timer, so the UI strings are `ui`
+  const levels = content.levels;
   const [sound, setSound] = useState(true);
   useEffect(() => {
     const muted = read("wtb:sound") === "0";
@@ -61,11 +64,21 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
         : { text: "text-work", stroke: "stroke-work", border: "border-white/10" };
 
   const label =
-    t.status === "done" ? "Done" : t.status === "idle" ? "Ready" : t.status === "paused" ? "Paused" : prepping ? "Get ready" : resting ? "Rest" : "Work";
+    t.status === "done"
+      ? ui.status.done
+      : t.status === "idle"
+        ? ui.status.ready
+        : t.status === "paused"
+          ? ui.status.paused
+          : prepping
+            ? ui.status.getReady
+            : resting
+              ? ui.status.rest
+              : ui.status.work;
 
   // Which side is up (alternating exercises): during rest, show the side that's coming.
   const upcoming = resting ? t.set + 1 : t.set;
-  const side = exercise.alternate ? (upcoming % 2 === 1 ? "Left" : "Right") : null;
+  const side = exercise.alternate ? (upcoming % 2 === 1 ? ui.sideLeft : ui.sideRight) : null;
 
   const toggle = () => (running ? t.pause() : t.start());
   const toggleRef = useRef(toggle);
@@ -83,13 +96,12 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Live countdown in the tab title.
+  // Live countdown in the tab title. Restores the title of the current language (not a captured one) so a mid-workout language switch can't leave a stale title.
   useEffect(() => {
     if (!running) return;
-    const prev = document.title;
-    document.title = `${secs}s · ${label} — ${exercise.name}`;
-    return () => { document.title = prev; };
-  }, [running, secs, label, exercise.name]);
+    document.title = `${ui.secs(secs)} · ${label} — ${exercise.name}`;
+    return () => { document.title = ui.meta.title; };
+  }, [running, secs, label, exercise.name, ui]);
 
   useEffect(() => { if (t.status === "done") onComplete(exercise.id); }, [t.status, exercise.id, onComplete]);
 
@@ -98,7 +110,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
       {/* The stage: visual + timer share one sticky card, so both stay on screen while the guide scrolls. */}
       <section
         className={`glass sticky top-2 z-20 rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 lg:top-4 lg:p-6 ${tone.border}`}
-        aria-label="Exercise stage"
+        aria-label={ui.stage}
       >
         <header className="mb-2 flex items-start justify-between gap-3 lg:mb-4">
           <div className="min-w-0">
@@ -112,7 +124,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
             <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl lg:text-3xl">{exercise.name}</h2>
           </div>
           <p className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
-            {exercise.sets} × {exercise.work}s · {exercise.rest}s rest
+            {ui.summary(exercise.sets, exercise.work, exercise.rest)}
           </p>
         </header>
 
@@ -120,11 +132,11 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
           <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 lg:col-span-1">
             <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
             {exercise.hold && !resting && (
-              <span className="absolute left-2 top-2 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-zinc-200">Hold</span>
+              <span className="absolute start-2 top-2 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-zinc-200">{ui.hold}</span>
             )}
             {resting && (
-              <span className="absolute right-2 top-2 rounded-full bg-rest/15 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-rest">
-                {side ? `Next: ${side}` : "Next set"}
+              <span className="absolute end-2 top-2 rounded-full bg-rest/15 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-rest">
+                {side ? ui.nextSide(side) : ui.nextSet}
               </span>
             )}
           </div>
@@ -153,12 +165,12 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
                   {t.status === "done" ? "✓" : secs}
                 </span>
                 <span className="mt-1 text-xs tabular-nums text-zinc-300">
-                  Set {t.set} / {exercise.sets}{side ? ` · ${side}` : ""}
+                  {ui.setOf(t.set, exercise.sets)}{side ? ` · ${side}` : ""}
                 </span>
               </div>
             </div>
 
-            <ol className="mt-2 flex gap-1.5" aria-label="Set progress">
+            <ol className="mt-2 flex gap-1.5" aria-label={ui.setProgress}>
               {Array.from({ length: exercise.sets }, (_, i) => {
                 const n = i + 1;
                 const done = n < t.set || t.status === "done";
@@ -172,18 +184,18 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
         </div>
 
         <div className="mt-3 flex items-center justify-center gap-4 lg:mt-5">
-          <button type="button" className={iconBtn} onClick={t.reset} aria-label="Reset timer" disabled={t.status === "idle"}>
+          <button type="button" className={iconBtn} onClick={t.reset} aria-label={ui.reset} disabled={t.status === "idle"}>
             <ResetIcon />
           </button>
           <button
             type="button"
             onClick={toggle}
-            aria-label={running ? "Pause" : t.status === "done" ? "Restart" : "Start"}
+            aria-label={running ? ui.pause : t.status === "done" ? ui.restart : ui.start}
             className="flex h-16 w-16 items-center justify-center rounded-full bg-work text-ink-950 shadow-glow transition-transform duration-150 ease-snap active:scale-95"
           >
             {running ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <button type="button" className={iconBtn} onClick={toggleSound} aria-label={sound ? "Mute cues" : "Unmute cues"} aria-pressed={!sound}>
+          <button type="button" className={iconBtn} onClick={toggleSound} aria-label={sound ? ui.muteCues : ui.unmuteCues} aria-pressed={!sound}>
             {sound ? <SoundOnIcon /> : <SoundOffIcon />}
           </button>
         </div>
@@ -194,11 +206,11 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
             onClick={onNext}
             className="animate-rise mt-3 flex min-h-11 w-full items-center justify-center rounded-2xl bg-white/10 px-4 text-sm font-semibold text-zinc-50 transition-transform duration-150 ease-snap active:scale-95 hover:bg-white/15"
           >
-            Next: {next.name} →
+            {ui.nextExercise(next.name)}
           </button>
         )}
-        <p className="sr-only" aria-live="polite">{label}, set {t.set} of {exercise.sets}{side ? `, ${side} side` : ""}</p>
-        <p className="mt-2 hidden text-center text-xs text-zinc-400 lg:block">Press Space to start or pause</p>
+        <p className="sr-only" aria-live="polite">{ui.live(label, t.set, exercise.sets, side)}</p>
+        <p className="mt-2 hidden text-center text-xs text-zinc-400 lg:block">{ui.spaceHint}</p>
       </section>
 
       <Guide exercise={exercise} />

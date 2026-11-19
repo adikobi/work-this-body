@@ -1,9 +1,13 @@
-import { bookends, levels, type Exercise } from "@/lib/exercises";
+"use client";
+import { useI18n } from "@/components/LocaleProvider";
+import type { Exercise } from "@/lib/exercises";
 
 // Surfaces separate by a step in tone, not by borders or shadows; glass is reserved for the floating stage.
 const card = "rounded-3xl bg-ink-800/70 p-5 animate-rise";
 
 export default function Guide({ exercise }: { exercise: Exercise }) {
+  const { t, content } = useI18n();
+  const { levels, bookends } = content;
   const { muscles, steps, cues } = exercise;
   const { warmup, cooldown } = exercise.phase ? { warmup: [] as Exercise[], cooldown: [] as Exercise[] } : bookends(exercise.cat);
   const link = "rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-100 transition-colors duration-150 ease-snap hover:bg-white/15";
@@ -15,7 +19,7 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${levels[exercise.level].chip}`}>{levels[exercise.level].label}</span>
           {exercise.phase && (
             <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-zinc-100">
-              {exercise.phase === "warmup" ? "Warm-up" : "Cool-down"}
+              {exercise.phase === "warmup" ? t.guide.warmup : t.guide.cooldown}
             </span>
           )}
           {muscles.primary.map((m) => (
@@ -25,11 +29,11 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
             <span key={m} className="rounded-full bg-white/10 px-3 py-1 text-xs text-zinc-200">{m}</span>
           ))}
         </div>
-        {exercise.alternate && <p className="mt-3 text-xs text-zinc-300">Alternate sides each set.</p>}
+        {exercise.alternate && <p className="mt-3 text-xs text-zinc-300">{t.guide.alternate}</p>}
       </section>
 
       <section className={card} style={{ animationDelay: "90ms" }}>
-        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">How to do it</h3>
+        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.howTo}</h3>
         <ol className="mt-3 space-y-3">
           {steps.map((s, i) => (
             <li key={s} className="flex gap-3">
@@ -41,7 +45,7 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
       </section>
 
       <section className={card} style={{ animationDelay: "140ms" }}>
-        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">Key cues</h3>
+        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.keyCues}</h3>
         <ul className="mt-3 space-y-2">
           {cues.map((c) => (
             <li key={c} className="flex items-center gap-3 rounded-2xl bg-ink-900 px-4 py-3 text-sm font-medium text-zinc-100">
@@ -51,16 +55,16 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
           ))}
         </ul>
         <p className="mt-4 text-xs leading-relaxed text-zinc-300">
-          Stop if you feel sharp or joint pain. If you have a current knee, back or pelvic condition, check with a clinician first.
+          {t.guide.safety}
         </p>
       </section>
 
       {(warmup.length > 0 || cooldown.length > 0) && (
         <section className={`${card} lg:col-span-2`} style={{ animationDelay: "190ms" }}>
-          <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">Warm up and cool down</h3>
-          <p className="mt-1 text-xs text-zinc-300">Suggested bookends for this kind of workout.</p>
+          <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.bookendsTitle}</h3>
+          <p className="mt-1 text-xs text-zinc-300">{t.guide.bookendsHint}</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            {([["Before", warmup], ["After", cooldown]] as const).map(([title, list]) =>
+            {([[t.guide.before, warmup], [t.guide.after, cooldown]] as const).map(([title, list]) =>
               list.length ? (
                 <div key={title}>
                   <p className="text-xs font-semibold uppercase tracking-widest text-zinc-300">{title}</p>

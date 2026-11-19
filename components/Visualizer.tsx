@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
+import { useI18n } from "@/components/LocaleProvider";
 import { VIEW, angDiff, poseAt, solve, type Motion, type Pose, type Pt } from "@/lib/rig";
 
 const pts = (...p: Pt[]) => p.map((q) => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(" ");
@@ -32,6 +33,7 @@ interface Props {
 }
 
 export default function Visualizer({ motion, cycle, playing, hold, resting, urgent }: Props) {
+  const { t } = useI18n();
   const uid = useId().replace(/:/g, "");
   const [pose, setPose] = useState<Pose>(motion.keys[0]);
   const live = useRef({ playing, hold });
@@ -76,7 +78,7 @@ export default function Visualizer({ motion, cycle, playing, hold, resting, urge
       height={VIEW.h}
       className="block h-auto w-full"
       role="img"
-      aria-label="Animated stick-figure demonstration of the exercise"
+      aria-label={t.visualizerAlt}
     >
       <defs>
         <linearGradient id={`${uid}-floor`} x1="0" x2="1" y1="0" y2="0">
