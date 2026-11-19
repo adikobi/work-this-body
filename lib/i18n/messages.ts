@@ -33,6 +33,7 @@ export interface Messages {
   summary: (sets: number, work: number, rest: number) => string;
 
   guide: {
+    startExercise: string;
     alternate: string;
     warmup: string;
     cooldown: string;
