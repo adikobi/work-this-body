@@ -4,6 +4,23 @@
 
 :root { color-scheme: dark; }
 
+/* Fonts. layout.tsx loads one variable per face; these two are what Tailwind's font-display / font-sans read. */
+:root {
+  --font-display: var(--font-display-en);
+  --font-body: var(--font-body-en);
+}
+/* Hebrew: the English faces have no Hebrew glyphs, so swap in faces that do. */
+html[lang="he"] {
+  --font-display: var(--font-display-he);
+  --font-body: var(--font-body-he);
+}
+
+/* The wordmark is a brand mark: same face and tracking in every language. */
+.brand { font-family: var(--font-display-en), ui-sans-serif, system-ui, sans-serif; }
+
+/* Letter-spacing pulls Hebrew letters apart and hurts legibility, so undo Tailwind's tracking-* there (not on the wordmark). */
+html[lang="he"] [class*="tracking-"]:not(.brand) { letter-spacing: normal; }
+
 html { -webkit-text-size-adjust: 100%; background: #070908; }
 
 body {
