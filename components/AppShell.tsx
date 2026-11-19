@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import Brand from "@/components/Brand";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import { useI18n } from "@/components/LocaleProvider";
@@ -39,6 +39,21 @@ export default function AppShell() {
   const [training, setTraining] = useState(false);
   const [menuOpen, setMenuOpen] = useState(true);
   useEffect(() => { setMenuOpen(!training); }, [training]);
+
+  // Swipe the catalog toward its own edge (left in LTR, right in RTL) to close it. Touch/pen only.
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const swipeStart = (e: PointerEvent) => {
+    swipe.current = e.pointerType === "mouse" ? null : { x: e.clientX, y: e.clientY };
+  };
+  const swipeEnd = (e: PointerEvent) => {
+    const s = swipe.current;
+    swipe.current = null;
+    if (!s) return;
+    const dx = e.clientX - s.x;
+    const dy = e.clientY - s.y;
+    const toward = getComputedStyle(e.currentTarget).direction === "rtl" ? dx : -dx;
+    if (toward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(false);
+  };
 
   const exercise = content.byId(exId);
   const category = categories.find((c) => c.id === exercise.cat) ?? categories[0];
@@ -106,7 +121,10 @@ export default function AppShell() {
         {/* Desktop catalog: width animates, inner content keeps its size so nothing reflows */}
         <aside
           id="exercise-catalog"
-          className={`no-scrollbar hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:sticky lg:top-4 lg:block lg:max-h-[calc(100dvh-7rem)] ${
+          onPointerDown={swipeStart}
+          onPointerUp={swipeEnd}
+          onPointerCancel={() => { swipe.current = null; }}
+          className={`no-scrollbar touch-pan-y hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:sticky lg:top-4 lg:block lg:max-h-[calc(100dvh-7rem)] ${
             menuOpen ? "w-72 opacity-100 lg:me-8" : "invisible w-0 opacity-0 lg:me-0"
           }`}
         >
