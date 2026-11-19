@@ -22,15 +22,22 @@ interface Props {
   next?: Exercise;
   onNext: () => void;
   onComplete: (id: string) => void;
+  onTrainingChange: (training: boolean) => void;
 }
 
-export default function Workout({ exercise, category, next, onNext, onComplete }: Props) {
+export default function Workout({ exercise, category, next, onNext, onComplete, onTrainingChange }: Props) {
   const { t: ui, content } = useI18n(); // `t` below is the interval timer, so the UI strings are `ui`
   const levels = content.levels;
   // "learn": read the instructions first. "train": timer + simulation. Resets per exercise (AppShell keys on exercise.id).
   const [mode, setMode] = useState<"learn" | "train">("learn");
   const modeRef = useRef(mode);
   useEffect(() => { modeRef.current = mode; });
+
+  // Tell the shell when training is active so it can collapse the catalog.
+  useEffect(() => {
+    onTrainingChange(mode === "train");
+    return () => onTrainingChange(false);
+  }, [mode, onTrainingChange]);
 
   const [sound, setSound] = useState(true);
   useEffect(() => {
@@ -149,18 +156,20 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
     );
   }
 
-  // ---- Step 2: workout. md+: stage left (sticky), guide right, so they never overlap ----
+  // ---- Step 2: workout. md+: large stage left (sticky), guide in a narrower column right, so they never overlap ----
   return (
-    <div className="animate-rise md:grid md:grid-cols-2 md:items-start md:gap-6">
+    <div className="animate-rise md:grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] md:items-start md:gap-6">
       <section
         className={`glass sticky top-2 z-20 rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:top-4 ${tone.border}`}
         aria-label={ui.stage}
       >
         {header}
 
-        <div className="grid grid-cols-5 items-center gap-2">
-          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60">
-            <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
+        <div className="grid grid-cols-5 items-center gap-2 md:grid-cols-1 md:gap-4">
+          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:col-span-1">
+            <div className="md:mx-auto md:max-w-[min(100%,62vh)]">
+              <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
+            </div>
             {exercise.hold && !resting && (
               <span className="absolute start-2 top-2 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-zinc-200">{ui.hold}</span>
             )}
@@ -171,8 +180,8 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
             )}
           </div>
 
-          <div className="col-span-2 flex flex-col items-center">
-            <div className="relative w-full max-w-xs">
+          <div className="col-span-2 flex flex-col items-center md:col-span-1 md:flex-row md:justify-center md:gap-6">
+            <div className="relative w-full max-w-xs md:max-w-[10rem]">
               <svg viewBox="0 0 120 120" width="120" height="120" className="block h-auto w-full" aria-hidden="true">
                 <circle cx="60" cy="60" r={R} className="fill-none stroke-white/10" strokeWidth="7" />
                 <circle
@@ -190,7 +199,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
                 <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-200 ${tone.text}`}>{label}</span>
                 <span
                   key={urgent ? secs : "steady"}
-                  className={`font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight ${urgent ? "animate-pop text-warn" : "text-zinc-50"}`}
+                  className={`font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight md:text-4xl ${urgent ? "animate-pop text-warn" : "text-zinc-50"}`}
                 >
                   {t.status === "done" ? "✓" : secs}
                 </span>
@@ -200,7 +209,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
               </div>
             </div>
 
-            <ol className="mt-2 flex gap-1.5" aria-label={ui.setProgress}>
+            <ol className="mt-2 flex gap-1.5 md:mt-0" aria-label={ui.setProgress}>
               {Array.from({ length: exercise.sets }, (_, i) => {
                 const n = i + 1;
                 const done = n < t.set || t.status === "done";
