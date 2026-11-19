@@ -1,6 +1,6 @@
 "use client";
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { LOCALE_COOKIE, dirOf, type Locale } from "@/lib/i18n/config";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { LOCALE_COOKIE, dirOf, isLocale, type Locale } from "@/lib/i18n/config";
 import { getContent, type Content } from "@/lib/i18n/content";
 import { messages, type Messages } from "@/lib/i18n/messages";
 
@@ -16,12 +16,20 @@ interface I18n {
 
 const Ctx = createContext<I18n | null>(null);
 
-/** `initial` comes from the server (cookie, then Accept-Language), so the first paint is already in the right language. */
 export default function LocaleProvider({ initial, children }: { initial: Locale; children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(initial);
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof document !== "undefined") {
+      const htmlLang = document.documentElement.lang;
+      if (isLocale(htmlLang)) return htmlLang;
+    }
+    return initial;
+  });
+
+  useEffect(() => {
+    document.title = messages[locale].meta.title;
+  }, [locale]);
 
   const setLocale = useCallback((l: Locale) => {
-    // <html> is updated in the same tick as the state, so there is never a frame of Hebrew text laid out left-to-right.
     const el = document.documentElement;
     el.lang = l;
     el.dir = dirOf(l);
