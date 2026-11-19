@@ -28,16 +28,6 @@ interface Props {
 export default function Workout({ exercise, category, next, onNext, onComplete, onTrainingChange }: Props) {
   const { t: ui, content } = useI18n(); // `t` below is the interval timer, so the UI strings are `ui`
   const levels = content.levels;
-  // "learn": read the instructions first. "train": timer + simulation. Resets per exercise (AppShell keys on exercise.id).
-  const [mode, setMode] = useState<"learn" | "train">("learn");
-  const modeRef = useRef(mode);
-  useEffect(() => { modeRef.current = mode; });
-
-  // Tell the shell when training is active so it can collapse the catalog.
-  useEffect(() => {
-    onTrainingChange(mode === "train");
-    return () => onTrainingChange(false);
-  }, [mode, onTrainingChange]);
 
   const [sound, setSound] = useState(true);
   useEffect(() => {
@@ -54,6 +44,13 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
   };
 
   const t = useIntervalTimer({ work: exercise.work, rest: exercise.rest, sets: exercise.sets, prep: PREP, sound: true });
+
+  // Lets the shell slide the catalog shut while an exercise is in progress.
+  const active = t.status !== "idle";
+  useEffect(() => {
+    onTrainingChange(active);
+    return () => onTrainingChange(false);
+  }, [active, onTrainingChange]);
 
   const secs = Math.ceil(t.remainingMs / 1000);
   const total = (t.phase === "work" ? exercise.work : t.phase === "rest" ? exercise.rest : PREP) * 1000;
@@ -86,6 +83,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
               ? ui.status.rest
               : ui.status.work;
 
+  // Which side is up (alternating exercises): during rest, show the side that's coming.
   const upcoming = resting ? t.set + 1 : t.set;
   const side = exercise.alternate ? (upcoming % 2 === 1 ? ui.sideLeft : ui.sideRight) : null;
 
@@ -93,11 +91,10 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
   const toggleRef = useRef(toggle);
   useEffect(() => { toggleRef.current = toggle; });
 
-  // Space starts / pauses (only in train mode; ignored while a button or field has focus).
+  // Space starts / pauses (ignored while a button or field has focus).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
-      if (modeRef.current !== "train") return;
       if (e.code !== "Space" || e.repeat || el?.closest("button, a, input, select, textarea")) return;
       e.preventDefault();
       toggleRef.current();
@@ -106,6 +103,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Live countdown in the tab title. Restores the title of the current language (not a captured one).
   useEffect(() => {
     if (!running) return;
     document.title = `${ui.secs(secs)} · ${label} — ${exercise.name}`;
@@ -114,60 +112,33 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
 
   useEffect(() => { if (t.status === "done") onComplete(exercise.id); }, [t.status, exercise.id, onComplete]);
 
-  const header = (
-    <header className="mb-2 flex items-start justify-between gap-3 md:mb-4">
-      <div className="min-w-0">
-        <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-zinc-300">
-          <span className={`h-1.5 w-1.5 rounded-full ${category.dot}`} />
-          {category.short}
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
-            {levels[exercise.level].label}
-          </span>
-        </p>
-        <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl">{exercise.name}</h2>
-      </div>
-      <p className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
-        {ui.summary(exercise.sets, exercise.work, exercise.rest)}
-      </p>
-    </header>
-  );
-
-  // ---- Step 1: read the instructions before anything starts ----
-  if (mode === "learn") {
-    return (
-      <div className="animate-rise">
-        <div className="mt-1 md:mt-0">{header}</div>
-        <div className="md:grid md:grid-cols-2 md:items-start md:gap-6">
-          <div className="overflow-hidden rounded-3xl bg-ink-950/60 md:sticky md:top-4">
-            <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing hold={false} resting={false} urgent={false} />
-          </div>
-          <Guide exercise={exercise} />
-        </div>
-        <div className="sticky bottom-3 z-20 flex justify-center pb-2">
-          <button
-            type="button"
-            onClick={() => setMode("train")}
-            className="flex h-14 w-full max-w-sm items-center justify-center rounded-full bg-work px-6 text-base font-bold text-ink-950 shadow-glow transition-transform duration-150 ease-snap active:scale-95"
-          >
-            {ui.guide.startExercise}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ---- Step 2: workout. md+: large stage left (sticky), guide in a narrower column right, so they never overlap ----
+  // md+: stage on the left (fills the viewport height, width follows the free space), guide in a fixed-width column on the right.
   return (
-    <div className="animate-rise md:grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] md:items-start md:gap-6">
+    <div className="animate-rise md:grid md:grid-cols-[minmax(0,1fr)_18rem] md:items-start md:gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
       <section
-        className={`glass sticky top-2 z-20 rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:top-4 ${tone.border}`}
+        className={`glass sticky top-2 z-20 flex flex-col rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:top-4 md:h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-7rem)] ${tone.border}`}
         aria-label={ui.stage}
       >
-        {header}
+        <header className="mb-2 flex items-start justify-between gap-3 md:mb-3">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-zinc-300">
+              <span className={`h-1.5 w-1.5 rounded-full ${category.dot}`} />
+              {category.short}
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
+                {levels[exercise.level].label}
+              </span>
+            </p>
+            <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl">{exercise.name}</h2>
+          </div>
+          <p className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
+            {ui.summary(exercise.sets, exercise.work, exercise.rest)}
+          </p>
+        </header>
 
-        <div className="grid grid-cols-5 items-center gap-2 md:grid-cols-1 md:gap-4">
-          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:col-span-1">
-            <div className="md:mx-auto md:max-w-[min(100%,62vh)]">
+        <div className="grid grid-cols-5 items-center gap-2 md:flex md:min-h-0 md:flex-1 md:flex-col md:gap-3">
+          {/* Simulation: on md+ it fills all the height left in the stage and the figure scales to fit */}
+          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:min-h-0 md:w-full md:flex-1">
+            <div className="md:absolute md:inset-0 md:[&>svg]:h-full md:[&>svg]:w-full">
               <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
             </div>
             {exercise.hold && !resting && (
@@ -180,8 +151,8 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
             )}
           </div>
 
-          <div className="col-span-2 flex flex-col items-center md:col-span-1 md:flex-row md:justify-center md:gap-6">
-            <div className="relative w-full max-w-xs md:max-w-[10rem]">
+          <div className="col-span-2 flex flex-col items-center md:shrink-0 md:flex-row md:justify-center md:gap-6">
+            <div className="relative w-full max-w-xs md:max-w-[8rem]">
               <svg viewBox="0 0 120 120" width="120" height="120" className="block h-auto w-full" aria-hidden="true">
                 <circle cx="60" cy="60" r={R} className="fill-none stroke-white/10" strokeWidth="7" />
                 <circle
@@ -222,7 +193,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-center gap-4">
+        <div className="mt-3 flex shrink-0 items-center justify-center gap-4">
           <button type="button" className={iconBtn} onClick={t.reset} aria-label={ui.reset} disabled={t.status === "idle"}>
             <ResetIcon />
           </button>
@@ -243,13 +214,13 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           <button
             type="button"
             onClick={onNext}
-            className="animate-rise mt-3 flex min-h-11 w-full items-center justify-center rounded-2xl bg-white/10 px-4 text-sm font-semibold text-zinc-50 transition-transform duration-150 ease-snap active:scale-95 hover:bg-white/15"
+            className="animate-rise mt-3 flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-white/10 px-4 text-sm font-semibold text-zinc-50 transition-transform duration-150 ease-snap active:scale-95 hover:bg-white/15"
           >
             {ui.nextExercise(next.name)}
           </button>
         )}
         <p className="sr-only" aria-live="polite">{ui.live(label, t.set, exercise.sets, side)}</p>
-        <p className="mt-2 hidden text-center text-xs text-zinc-400 md:block">{ui.spaceHint}</p>
+        <p className="mt-2 hidden shrink-0 text-center text-xs text-zinc-400 lg:block">{ui.spaceHint}</p>
       </section>
 
       <Guide exercise={exercise} />
