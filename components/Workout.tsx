@@ -13,8 +13,7 @@ const R = 52;
 const C = 2 * Math.PI * R;
 const PREP = 5; // get-ready seconds
 
-const iconBtn =
-  "flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-zinc-200 transition-transform duration-150 ease-snap active:scale-95 hover:bg-white/10 disabled:opacity-30 disabled:active:scale-100";
+const iconBtn = "btn btn-secondary btn-icon";
 
 interface Props {
   exercise: Exercise;
@@ -116,7 +115,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
   return (
     <div className="animate-rise md:grid md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_min(21rem,31vw)] md:grid-rows-[minmax(0,1fr)] md:gap-6">
       <section
-        className={`glass sticky top-2 z-20 flex flex-col rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:static md:h-full md:min-h-0 ${tone.border}`}
+        className={`sticky top-2 z-20 flex flex-col rounded-3xl border bg-ink-900 p-3 transition-colors duration-200 ease-snap sm:p-4 md:static md:h-full md:min-h-0 ${tone.border}`}
         aria-label={ui.stage}
       >
         <header className="mb-2 flex items-start justify-between gap-3 md:mb-3">
@@ -124,7 +123,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-zinc-300">
               <span className={`h-1.5 w-1.5 rounded-full ${category.dot}`} />
               {category.short}
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
+              <span className={`rounded-full px-2 py-0.5 text-xs font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
                 {levels[exercise.level].label}
               </span>
             </p>
@@ -137,7 +136,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
 
         <div className="grid grid-cols-5 items-center gap-2 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_14rem] lg:grid-cols-[minmax(0,1fr)_16rem] md:grid-rows-[minmax(0,1fr)] md:gap-6">
           {/* Simulation: on md+ it fills all the height left in the stage and the figure scales to fit */}
-          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:col-span-1 md:h-full md:min-h-0">
+          <div className="sheet relative col-span-3 overflow-hidden rounded-2xl md:col-span-1 md:h-full md:min-h-0">
             <div className="md:absolute md:inset-0 md:[&>svg]:h-full md:[&>svg]:w-full">
               <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
             </div>
@@ -154,12 +153,13 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           <div className="col-span-2 flex flex-col items-center md:col-span-1 md:justify-center">
             <div className="relative w-full max-w-xs md:max-w-[14rem] lg:max-w-[16rem]">
               <svg viewBox="0 0 120 120" width="120" height="120" className="block h-auto w-full" aria-hidden="true">
-                <circle cx="60" cy="60" r={R} className="fill-none stroke-white/10" strokeWidth="7" />
+                <circle cx="60" cy="60" r="58" transform="rotate(-90 60 60)" className="fill-none stroke-white/20" strokeWidth="3" strokeDasharray="1.2 4.874" />
+                <circle cx="60" cy="60" r={R} className="fill-none stroke-white/10" strokeWidth="6" />
                 <circle
                   cx="60" cy="60" r={R}
                   transform="rotate(-90 60 60)"
                   className={`fill-none ${tone.stroke}`}
-                  strokeWidth="7"
+                  strokeWidth="6"
                   strokeLinecap="round"
                   strokeDasharray={C}
                   strokeDashoffset={C * (1 - frac)}
@@ -201,7 +201,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
             type="button"
             onClick={toggle}
             aria-label={running ? ui.pause : t.status === "done" ? ui.restart : ui.start}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-work text-ink-950 shadow-glow transition-transform duration-150 ease-snap active:scale-95"
+            className={`btn btn-round ${t.status === "done" && next ? "btn-secondary" : "btn-primary"}`}
           >
             {running ? <PauseIcon /> : <PlayIcon />}
           </button>
@@ -214,7 +214,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           <button
             type="button"
             onClick={onNext}
-            className="animate-rise mt-3 flex min-h-11 w-full shrink-0 items-center justify-center rounded-2xl bg-white/10 px-4 text-sm font-semibold text-zinc-50 transition-transform duration-150 ease-snap active:scale-95 hover:bg-white/15"
+            className="btn btn-primary animate-rise mt-3 w-full whitespace-normal py-2"
           >
             {ui.nextExercise(next.name)}
           </button>

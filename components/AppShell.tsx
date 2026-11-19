@@ -8,19 +8,15 @@ import Workout from "@/components/Workout";
 import { byId as baseById, levelOrder, type Level } from "@/lib/exercises";
 import { read, today, write } from "@/lib/storage";
 
-const pill =
-  "flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-[background-color,color,transform] duration-150 ease-snap active:scale-95";
-const on = "bg-work/20 text-work";
-const off = "bg-white/10 text-zinc-100 hover:bg-white/15";
 
 type LevelFilter = Level | "all";
 
 function LevelChips({ value, onChange }: { value: LevelFilter; onChange: (l: LevelFilter) => void }) {
   const { t, content } = useI18n();
   return (
-    <div className="flex gap-2" role="group" aria-label={t.filterByDifficulty}>
+    <div className="flex gap-2 lg:flex-wrap" role="group" aria-label={t.filterByDifficulty}>
       {(["all", ...levelOrder] as const).map((l) => (
-        <button key={l} type="button" aria-pressed={value === l} onClick={() => onChange(l)} className={`${pill} min-h-9 px-3 text-xs ${value === l ? on : off}`}>
+        <button key={l} type="button" aria-pressed={value === l} onClick={() => onChange(l)} className={`btn btn-secondary btn-sm ${value === l ? "btn-on" : ""}`}>
           {l === "all" ? t.allLevels : content.levels[l].label}
         </button>
       ))}
@@ -122,7 +118,7 @@ export default function AppShell() {
       onPointerCancel={() => { edge.current = null; }}
     >
       {/* Desktop header: always visible, so the logo never moves */}
-      <div className="mb-4 hidden shrink-0 items-center justify-between gap-4 lg:flex">
+      <div className="mb-4 hidden shrink-0 items-center justify-between gap-4 border-b border-white/10 pb-4 lg:flex">
         <div className="flex items-baseline gap-4">
           <h1 className="text-2xl"><Brand /></h1>
           <p className="text-xs tabular-nums text-zinc-300">{t.todayLong(done.length, exercises.length)}</p>
@@ -134,7 +130,7 @@ export default function AppShell() {
             onClick={() => setMenuOpen((o) => !o)}
             aria-expanded={menuOpen}
             aria-controls="exercise-catalog"
-            className={`${pill} min-h-9 px-4 text-xs ${menuOpen ? on : off}`}
+            className={`btn btn-secondary ${menuOpen ? "btn-on" : ""}`}
           >
             {t.exercisesNav}
           </button>
@@ -172,7 +168,7 @@ export default function AppShell() {
                     </button>
                     {isOpen && (
                       <ul className="mb-2 space-y-0.5">
-                        {list.map((e) => (
+                        {list.map((e, i) => (
                           <li key={e.id}>
                             <button
                               type="button"
@@ -180,8 +176,8 @@ export default function AppShell() {
                               aria-current={e.id === exId}
                               className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-start text-sm transition-[background-color,color] duration-150 ease-snap ${e.id === exId ? "bg-white/10 font-semibold text-zinc-50" : "text-zinc-200 hover:bg-white/5"}`}
                             >
-                              {e.name}
-                              {tick(e.id)}
+                              <span className="flex min-w-0 items-baseline gap-3"><span className="w-5 shrink-0 text-xs tabular-nums text-zinc-500">{String(i + 1).padStart(2, "0")}</span>{e.name}</span>
+                            {tick(e.id)}
                             </button>
                           </li>
                         ))}
@@ -210,7 +206,7 @@ export default function AppShell() {
                 <button
                   key={c.id}
                   type="button"
-                  className={`${pill} ${c.id === exercise.cat ? on : off}`}
+                  className={`btn btn-secondary ${c.id === exercise.cat ? "btn-on" : ""}`}
                   onClick={() => select(visible.find((e) => e.cat === c.id)?.id ?? exId)}
                 >
                   {c.short}
@@ -219,7 +215,7 @@ export default function AppShell() {
             </div>
             <div className="no-scrollbar -mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-2">
               {visible.filter((e) => e.cat === exercise.cat).map((e) => (
-                <button key={e.id} type="button" className={`${pill} text-xs ${e.id === exId ? "bg-white/20 text-zinc-50" : off}`} onClick={() => select(e.id)}>
+                <button key={e.id} type="button" className={`btn btn-secondary btn-sm ${e.id === exId ? "btn-on" : ""}`} onClick={() => select(e.id)}>
                   {tick(e.id)}
                   {e.name}
                 </button>
