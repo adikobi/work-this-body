@@ -27,6 +27,11 @@ interface Props {
 export default function Workout({ exercise, category, next, onNext, onComplete }: Props) {
   const { t: ui, content } = useI18n(); // `t` below is the interval timer, so the UI strings are `ui`
   const levels = content.levels;
+  // "learn": read the instructions first. "train": timer + simulation. Resets per exercise (AppShell keys on exercise.id).
+  const [mode, setMode] = useState<"learn" | "train">("learn");
+  const modeRef = useRef(mode);
+  useEffect(() => { modeRef.current = mode; });
+
   const [sound, setSound] = useState(true);
   useEffect(() => {
     const muted = read("wtb:sound") === "0";
@@ -36,13 +41,11 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
   const toggleSound = () => {
     const next = !sound;
     setSound(next);
-    setMuted(!next); // the audio layer owns muting
+    setMuted(!next);
     write("wtb:sound", next ? "1" : "0");
-    if (next) unlockAudio(); // un-muting is a user gesture: make sure the audio context is running
+    if (next) unlockAudio();
   };
 
-  // `sound` is always true here on purpose: the timer keeps firing its cues and lib/audio silences them
-  // while muted, so un-muting works immediately and the timer never holds a stale mute value.
   const t = useIntervalTimer({ work: exercise.work, rest: exercise.rest, sets: exercise.sets, prep: PREP, sound: true });
 
   const secs = Math.ceil(t.remainingMs / 1000);
@@ -76,7 +79,6 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
               ? ui.status.rest
               : ui.status.work;
 
-  // Which side is up (alternating exercises): during rest, show the side that's coming.
   const upcoming = resting ? t.set + 1 : t.set;
   const side = exercise.alternate ? (upcoming % 2 === 1 ? ui.sideLeft : ui.sideRight) : null;
 
@@ -84,10 +86,11 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
   const toggleRef = useRef(toggle);
   useEffect(() => { toggleRef.current = toggle; });
 
-  // Space starts / pauses (ignored while a button or field has focus).
+  // Space starts / pauses (only in train mode; ignored while a button or field has focus).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
+      if (modeRef.current !== "train") return;
       if (e.code !== "Space" || e.repeat || el?.closest("button, a, input, select, textarea")) return;
       e.preventDefault();
       toggleRef.current();
@@ -96,7 +99,6 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Live countdown in the tab title. Restores the title of the current language (not a captured one) so a mid-workout language switch can't leave a stale title.
   useEffect(() => {
     if (!running) return;
     document.title = `${ui.secs(secs)} · ${label} — ${exercise.name}`;
@@ -105,31 +107,59 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
 
   useEffect(() => { if (t.status === "done") onComplete(exercise.id); }, [t.status, exercise.id, onComplete]);
 
+  const header = (
+    <header className="mb-2 flex items-start justify-between gap-3 md:mb-4">
+      <div className="min-w-0">
+        <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-zinc-300">
+          <span className={`h-1.5 w-1.5 rounded-full ${category.dot}`} />
+          {category.short}
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
+            {levels[exercise.level].label}
+          </span>
+        </p>
+        <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl">{exercise.name}</h2>
+      </div>
+      <p className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
+        {ui.summary(exercise.sets, exercise.work, exercise.rest)}
+      </p>
+    </header>
+  );
+
+  // ---- Step 1: read the instructions before anything starts ----
+  if (mode === "learn") {
+    return (
+      <div className="animate-rise">
+        <div className="mt-1 md:mt-0">{header}</div>
+        <div className="md:grid md:grid-cols-2 md:items-start md:gap-6">
+          <div className="overflow-hidden rounded-3xl bg-ink-950/60 md:sticky md:top-4">
+            <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing hold={false} resting={false} urgent={false} />
+          </div>
+          <Guide exercise={exercise} />
+        </div>
+        <div className="sticky bottom-3 z-20 flex justify-center pb-2">
+          <button
+            type="button"
+            onClick={() => setMode("train")}
+            className="flex h-14 w-full max-w-sm items-center justify-center rounded-full bg-work px-6 text-base font-bold text-ink-950 shadow-glow transition-transform duration-150 ease-snap active:scale-95"
+          >
+            {ui.guide.startExercise}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Step 2: workout. md+: stage left (sticky), guide right, so they never overlap ----
   return (
-    <div className="animate-rise">
-      {/* The stage: visual + timer share one sticky card, so both stay on screen while the guide scrolls. */}
+    <div className="animate-rise md:grid md:grid-cols-2 md:items-start md:gap-6">
       <section
-        className={`glass sticky top-2 z-20 rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 lg:top-4 lg:p-6 ${tone.border}`}
+        className={`glass sticky top-2 z-20 rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:top-4 ${tone.border}`}
         aria-label={ui.stage}
       >
-        <header className="mb-2 flex items-start justify-between gap-3 lg:mb-4">
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-zinc-300">
-              <span className={`h-1.5 w-1.5 rounded-full ${category.dot}`} />
-              {category.short}
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal ${levels[exercise.level].chip}`}>
-                {levels[exercise.level].label}
-              </span>
-            </p>
-            <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl lg:text-3xl">{exercise.name}</h2>
-          </div>
-          <p className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
-            {ui.summary(exercise.sets, exercise.work, exercise.rest)}
-          </p>
-        </header>
+        {header}
 
-        <div className="grid grid-cols-5 items-center gap-2 lg:grid-cols-2 lg:gap-8">
-          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 lg:col-span-1">
+        <div className="grid grid-cols-5 items-center gap-2">
+          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60">
             <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
             {exercise.hold && !resting && (
               <span className="absolute start-2 top-2 rounded-full bg-white/10 px-2 py-0.5 text-xs font-medium uppercase tracking-widest text-zinc-200">{ui.hold}</span>
@@ -141,7 +171,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
             )}
           </div>
 
-          <div className="col-span-2 flex flex-col items-center lg:col-span-1">
+          <div className="col-span-2 flex flex-col items-center">
             <div className="relative w-full max-w-xs">
               <svg viewBox="0 0 120 120" width="120" height="120" className="block h-auto w-full" aria-hidden="true">
                 <circle cx="60" cy="60" r={R} className="fill-none stroke-white/10" strokeWidth="7" />
@@ -160,7 +190,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
                 <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-200 ${tone.text}`}>{label}</span>
                 <span
                   key={urgent ? secs : "steady"}
-                  className={`font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight sm:text-6xl lg:text-7xl ${urgent ? "animate-pop text-warn" : "text-zinc-50"}`}
+                  className={`font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight ${urgent ? "animate-pop text-warn" : "text-zinc-50"}`}
                 >
                   {t.status === "done" ? "✓" : secs}
                 </span>
@@ -183,7 +213,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
           </div>
         </div>
 
-        <div className="mt-3 flex items-center justify-center gap-4 lg:mt-5">
+        <div className="mt-3 flex items-center justify-center gap-4">
           <button type="button" className={iconBtn} onClick={t.reset} aria-label={ui.reset} disabled={t.status === "idle"}>
             <ResetIcon />
           </button>
@@ -210,7 +240,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete }
           </button>
         )}
         <p className="sr-only" aria-live="polite">{ui.live(label, t.set, exercise.sets, side)}</p>
-        <p className="mt-2 hidden text-center text-xs text-zinc-400 lg:block">{ui.spaceHint}</p>
+        <p className="mt-2 hidden text-center text-xs text-zinc-400 md:block">{ui.spaceHint}</p>
       </section>
 
       <Guide exercise={exercise} />
