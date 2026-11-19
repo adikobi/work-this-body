@@ -114,7 +114,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
 
   // md+: stage on the left (fills the viewport height, width follows the free space), guide in a fixed-width column on the right.
   return (
-    <div className="animate-rise md:grid md:grid-cols-[minmax(0,1fr)_18rem] md:items-start md:gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div className="animate-rise md:grid md:grid-cols-[minmax(0,40rem)_minmax(14rem,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,46rem)_minmax(16rem,1fr)]">
       <section
         className={`glass sticky top-2 z-20 flex flex-col rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:top-4 md:h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-7rem)] ${tone.border}`}
         aria-label={ui.stage}
@@ -135,9 +135,9 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </p>
         </header>
 
-        <div className="grid grid-cols-5 items-center gap-2 md:flex md:min-h-0 md:flex-1 md:flex-col md:gap-3">
+        <div className="grid grid-cols-5 items-center gap-2 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:grid-rows-[minmax(0,1fr)] md:gap-6">
           {/* Simulation: on md+ it fills all the height left in the stage and the figure scales to fit */}
-          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:min-h-0 md:w-full md:flex-1">
+          <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:col-span-1 md:h-full md:min-h-0">
             <div className="md:absolute md:inset-0 md:[&>svg]:h-full md:[&>svg]:w-full">
               <Visualizer motion={exercise.motion} cycle={exercise.cycle} playing={playing} hold={hold} resting={resting} urgent={urgent} />
             </div>
@@ -151,8 +151,8 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
             )}
           </div>
 
-          <div className="col-span-2 flex flex-col items-center md:shrink-0 md:flex-row md:justify-center md:gap-6">
-            <div className="relative w-full max-w-xs md:max-w-[8rem]">
+          <div className="col-span-2 flex flex-col items-center md:col-span-1 md:justify-center">
+            <div className="relative w-full max-w-xs md:max-w-[14rem] lg:max-w-[16rem]">
               <svg viewBox="0 0 120 120" width="120" height="120" className="block h-auto w-full" aria-hidden="true">
                 <circle cx="60" cy="60" r={R} className="fill-none stroke-white/10" strokeWidth="7" />
                 <circle
@@ -170,7 +170,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
                 <span className={`text-xs font-semibold uppercase tracking-widest transition-colors duration-200 ${tone.text}`}>{label}</span>
                 <span
                   key={urgent ? secs : "steady"}
-                  className={`font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight md:text-4xl ${urgent ? "animate-pop text-warn" : "text-zinc-50"}`}
+                  className={`font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight md:text-6xl lg:text-7xl ${urgent ? "animate-pop text-warn" : "text-zinc-50"}`}
                 >
                   {t.status === "done" ? "✓" : secs}
                 </span>
@@ -180,7 +180,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
               </div>
             </div>
 
-            <ol className="mt-2 flex gap-1.5 md:mt-0" aria-label={ui.setProgress}>
+            <ol className="mt-3 flex gap-1.5" aria-label={ui.setProgress}>
               {Array.from({ length: exercise.sets }, (_, i) => {
                 const n = i + 1;
                 const done = n < t.set || t.status === "done";
