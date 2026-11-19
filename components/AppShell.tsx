@@ -55,6 +55,25 @@ export default function AppShell() {
     if (toward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(false);
   };
 
+  // Swipe inward from the catalog's screen edge (left in LTR, right in RTL) to open it. Desktop/landscape only.
+  const edge = useRef<{ x: number; y: number } | null>(null);
+  const edgeStart = (e: PointerEvent) => {
+    edge.current = null;
+    if (menuOpen || e.pointerType === "mouse" || !window.matchMedia("(min-width: 1024px)").matches) return;
+    const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
+    const fromEdge = rtl ? window.innerWidth - e.clientX : e.clientX;
+    if (fromEdge <= 48) edge.current = { x: e.clientX, y: e.clientY };
+  };
+  const edgeEnd = (e: PointerEvent) => {
+    const s = edge.current;
+    edge.current = null;
+    if (!s) return;
+    const dx = e.clientX - s.x;
+    const dy = e.clientY - s.y;
+    const inward = getComputedStyle(e.currentTarget).direction === "rtl" ? -dx : dx;
+    if (inward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(true);
+  };
+
   const exercise = content.byId(exId);
   const category = categories.find((c) => c.id === exercise.cat) ?? categories[0];
   const key = `wtb:done:${today()}`;
@@ -96,9 +115,14 @@ export default function AppShell() {
   const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label={t.completedToday}>✓</span> : null);
 
   return (
-    <div className="mx-auto min-h-dvh max-w-[1800px] px-3 pb-6 pt-4 sm:px-6 lg:pt-8">
+    <div
+      className="mx-auto flex min-h-dvh max-w-[1800px] flex-col px-3 pb-6 pt-4 sm:px-6 md:h-dvh md:overflow-hidden md:pb-4 lg:touch-pan-y lg:pt-6"
+      onPointerDown={edgeStart}
+      onPointerUp={edgeEnd}
+      onPointerCancel={() => { edge.current = null; }}
+    >
       {/* Desktop header: always visible, so the logo never moves */}
-      <div className="mb-4 hidden items-center justify-between gap-4 lg:flex">
+      <div className="mb-4 hidden shrink-0 items-center justify-between gap-4 lg:flex">
         <div className="flex items-baseline gap-4">
           <h1 className="text-2xl"><Brand /></h1>
           <p className="text-xs tabular-nums text-zinc-300">{t.todayLong(done.length, exercises.length)}</p>
@@ -117,14 +141,14 @@ export default function AppShell() {
         </div>
       </div>
 
-      <div className="lg:flex lg:items-start">
+      <div className="md:flex md:min-h-0 md:flex-1">
         {/* Desktop catalog: width animates, inner content keeps its size so nothing reflows */}
         <aside
           id="exercise-catalog"
           onPointerDown={swipeStart}
           onPointerUp={swipeEnd}
           onPointerCancel={() => { swipe.current = null; }}
-          className={`no-scrollbar touch-pan-y hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:sticky lg:top-4 lg:block lg:max-h-[calc(100dvh-7rem)] ${
+          className={`no-scrollbar touch-pan-y hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:block ${
             menuOpen ? "w-72 opacity-100 lg:me-8" : "invisible w-0 opacity-0 lg:me-0"
           }`}
         >
@@ -170,9 +194,9 @@ export default function AppShell() {
           </div>
         </aside>
 
-        <main className="min-w-0 flex-1">
+        <main className="min-w-0 flex-1 md:flex md:min-h-0 md:flex-col">
           {/* Mobile catalog */}
-          <div className="lg:hidden">
+          <div className="md:shrink-0 lg:hidden">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
               <h1 className="text-xl"><Brand /></h1>
               <div className="flex items-center gap-3">

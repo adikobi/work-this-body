@@ -12,7 +12,7 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
   const { warmup, cooldown } = exercise.phase ? { warmup: [] as Exercise[], cooldown: [] as Exercise[] } : bookends(exercise.cat);
   const link = "rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-100 transition-colors duration-150 ease-snap hover:bg-white/15";
   return (
-    <div className="mt-4 grid gap-3 pb-10 md:mt-0">
+    <div dir="auto" className="mt-4 grid content-start gap-3 pb-10 md:mt-0 md:min-h-0 md:overflow-y-auto md:overscroll-contain md:pb-2 md:pe-1">
       <section className={card} style={{ animationDelay: "40ms" }}>
         <p className="text-sm text-zinc-50">{exercise.tagline}</p>
         <div className="mt-3 flex flex-wrap gap-1.5">

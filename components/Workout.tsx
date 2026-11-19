@@ -114,9 +114,9 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
 
   // md+: stage on the left (fills the viewport height, width follows the free space), guide in a fixed-width column on the right.
   return (
-    <div className="animate-rise md:grid md:grid-cols-[minmax(0,40rem)_minmax(14rem,1fr)] md:items-start md:gap-6 lg:grid-cols-[minmax(0,46rem)_minmax(16rem,1fr)]">
+    <div className="animate-rise md:grid md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_min(21rem,31vw)] md:grid-rows-[minmax(0,1fr)] md:gap-6">
       <section
-        className={`glass sticky top-2 z-20 flex flex-col rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:top-4 md:h-[calc(100dvh-2rem)] lg:h-[calc(100dvh-7rem)] ${tone.border}`}
+        className={`glass sticky top-2 z-20 flex flex-col rounded-3xl border bg-ink-900/70 p-3 shadow-glass backdrop-blur-xl transition-colors duration-200 ease-snap sm:p-4 md:static md:h-full md:min-h-0 ${tone.border}`}
         aria-label={ui.stage}
       >
         <header className="mb-2 flex items-start justify-between gap-3 md:mb-3">
@@ -135,7 +135,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </p>
         </header>
 
-        <div className="grid grid-cols-5 items-center gap-2 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] md:grid-rows-[minmax(0,1fr)] md:gap-6">
+        <div className="grid grid-cols-5 items-center gap-2 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_14rem] lg:grid-cols-[minmax(0,1fr)_16rem] md:grid-rows-[minmax(0,1fr)] md:gap-6">
           {/* Simulation: on md+ it fills all the height left in the stage and the figure scales to fit */}
           <div className="relative col-span-3 overflow-hidden rounded-2xl bg-ink-950/60 md:col-span-1 md:h-full md:min-h-0">
             <div className="md:absolute md:inset-0 md:[&>svg]:h-full md:[&>svg]:w-full">
