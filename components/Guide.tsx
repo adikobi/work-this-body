@@ -60,8 +60,8 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
       </section>
 
       {(warmup.length > 0 || cooldown.length > 0) && (
-       <section className={card} style={{ animationDelay: "190ms" }}>
-        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.bookendsTitle}</h3>
+        <section className={card} style={{ animationDelay: "190ms" }}>
+          <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.bookendsTitle}</h3>
           <p className="mt-1 text-xs text-zinc-300">{t.guide.bookendsHint}</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             {([[t.guide.before, warmup], [t.guide.after, cooldown]] as const).map(([title, list]) =>
