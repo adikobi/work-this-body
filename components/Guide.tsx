@@ -12,8 +12,8 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
   const { warmup, cooldown } = exercise.phase ? { warmup: [] as Exercise[], cooldown: [] as Exercise[] } : bookends(exercise.cat);
   const link = "rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-zinc-100 transition-colors duration-150 ease-snap hover:bg-white/15";
   return (
-    <div className="mt-4 grid gap-4 pb-10 lg:grid-cols-2">
-      <section className={`${card} lg:col-span-2`} style={{ animationDelay: "40ms" }}>
+    <div className="mt-4 grid gap-4 pb-10 md:mt-0">
+      <section className={card} style={{ animationDelay: "40ms" }}>
         <p className="text-base text-zinc-50">{exercise.tagline}</p>
         <div className="mt-4 flex flex-wrap gap-2">
           <span className={`rounded-full px-3 py-1 text-xs font-semibold ${levels[exercise.level].chip}`}>{levels[exercise.level].label}</span>
@@ -60,8 +60,8 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
       </section>
 
       {(warmup.length > 0 || cooldown.length > 0) && (
-        <section className={`${card} lg:col-span-2`} style={{ animationDelay: "190ms" }}>
-          <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.bookendsTitle}</h3>
+       <section className={card} style={{ animationDelay: "190ms" }}>
+        <h3 className="font-display text-lg font-bold tracking-tight text-zinc-50">{t.guide.bookendsTitle}</h3>
           <p className="mt-1 text-xs text-zinc-300">{t.guide.bookendsHint}</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             {([[t.guide.before, warmup], [t.guide.after, cooldown]] as const).map(([title, list]) =>
