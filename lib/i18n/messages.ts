@@ -48,6 +48,10 @@ export interface Messages {
     bookendsHint: string;
     before: string;
     after: string;
+    targetsTitle: string;
+    strengthens: string;
+    alsoWorks: string;
+    benefits: string;
   };
   visualizerAlt: string;
 }
@@ -84,7 +88,7 @@ const en: Messages = {
   unmuteCues: "Unmute cues",
   nextExercise: (name) => `Next: ${name} →`,
   skipRest: "Skip rest",
-  skipToNext: "Next exercise →",
+  skipToNext: "Next exercise",
   live: (label, set, total, side) => `${label}, set ${set} of ${total}${side ? `, ${side} side` : ""}`,
   spaceHint: "Press Space to start or pause",
   secs: (n) => `${n}s`,
@@ -101,6 +105,10 @@ const en: Messages = {
     bookendsHint: "Suggested bookends for this kind of workout.",
     before: "Before",
     after: "After",
+    targetsTitle: "Target muscles & benefits",
+    strengthens: "Strengthens",
+    alsoWorks: "Also works",
+    benefits: "Benefits",
   },
   visualizerAlt: "Animated stick-figure demonstration of the exercise",
 };
@@ -138,7 +146,7 @@ const he: Messages = {
   unmuteCues: "הפעלת צלילי הטיימר",
   nextExercise: (name) => `הבא: ${name} ←`, // the arrow points the way the text reads
   skipRest: "דלגו על המנוחה",
-  skipToNext: "לתרגיל הבא ←",
+  skipToNext: "לתרגיל הבא",
   live: (label, set, total, side) => `${label}, סט ${set} מתוך ${total}${side ? `, צד ${side}` : ""}`,
   spaceHint: "לחצו על מקש הרווח (Space) כדי להתחיל או להשהות",
   secs: (n) => `${n} שנ׳`,
@@ -155,6 +163,10 @@ const he: Messages = {
     bookendsHint: "הצעות לפני ואחרי סוג אימון כזה.",
     before: "לפני",
     after: "אחרי",
+    targetsTitle: "שרירי מטרה ויתרונות",
+    strengthens: "מחזק",
+    alsoWorks: "עובד גם על",
+    benefits: "יתרונות",
   },
   visualizerAlt: "הדגמה מונפשת של התרגיל בדמות מקלות",
 };

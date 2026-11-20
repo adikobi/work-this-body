@@ -6,6 +6,7 @@ export interface ExerciseText {
   tagline: string;
   steps: string[]; // same length as the English steps
   cues: string[]; // same length as the English cues
+  benefits?: string[]; // what the exercise is good for; same length as the English benefits
 }
 
 export interface CategoryText { name: string; short: string }
