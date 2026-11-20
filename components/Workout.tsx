@@ -210,15 +210,20 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </button>
         </div>
 
-        {t.status === "done" && next && (
+        {/* Always rendered so the stage never jumps; buttons enable when they apply. */}
+        <div className="mt-3 flex shrink-0 items-stretch gap-2.5">
+          <button type="button" className="btn btn-secondary h-auto flex-1 whitespace-normal py-2" onClick={t.skipRest} disabled={!resting || t.status === "idle"}>
+            {ui.skipRest}
+          </button>
           <button
             type="button"
             onClick={onNext}
-            className="btn btn-primary animate-rise mt-3 w-full whitespace-normal py-2"
+            disabled={!next}
+            className={`btn h-auto flex-1 whitespace-normal py-2 ${t.status === "done" ? "btn-primary animate-rise" : "btn-secondary"}`}
           >
-            {ui.nextExercise(next.name)}
+            {t.status === "done" && next ? ui.nextExercise(next.name) : ui.skipToNext}
           </button>
-        )}
+        </div>
         <p className="sr-only" aria-live="polite">{ui.live(label, t.set, exercise.sets, side)}</p>
         <p className="mt-2 hidden shrink-0 text-center text-xs text-zinc-400 lg:block">{ui.spaceHint}</p>
       </section>
