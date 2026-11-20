@@ -3,6 +3,7 @@ import { Bricolage_Grotesque, Heebo, Instrument_Sans, Rubik } from "next/font/go
 import LocaleProvider from "@/components/LocaleProvider";
 import { LOCALE_COOKIE, defaultLocale, dirOf } from "@/lib/i18n/config";
 import { messages } from "@/lib/i18n/messages";
+import { THEMES, THEME_KEY, defaultTheme } from "@/lib/theme";
 import "./globals.css";
 
 const displayEn = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display-en", display: "swap", preload: false });
@@ -44,6 +45,24 @@ const localeBootstrapScript = `
 })();
 `;
 
+// Applies the saved theme (and the browser's theme-color) before first paint so there is no flash.
+const themeBootstrapScript = `
+(function() {
+  try {
+    var colors = ${JSON.stringify(Object.fromEntries(THEMES.map((t) => [t.id, t.page])))};
+    var id = localStorage.getItem("${THEME_KEY}");
+    if (!colors[id]) id = "${defaultTheme}";
+    document.documentElement.setAttribute("data-theme", id);
+    var set = function() {
+      var m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute("content", colors[id]);
+    };
+    set();
+    document.addEventListener("DOMContentLoaded", set);
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
@@ -53,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${displayEn.variable} ${bodyEn.variable} ${displayHe.variable} ${bodyHe.variable}`}
     >
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />
         <script dangerouslySetInnerHTML={{ __html: localeBootstrapScript }} />
       </head>
       <body className="font-sans antialiased">
