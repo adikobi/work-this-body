@@ -1,9 +1,12 @@
 import type { Locale } from "./config";
+import type { ThemeId } from "../theme";
 
 /** Every UI string that isn't exercise content. Functions take the dynamic parts so word order can differ per language. */
 export interface Messages {
   meta: { title: string; description: string };
   language: string;
+  theme: string;
+  themes: Record<ThemeId, string>;
   filterByDifficulty: string;
   allLevels: string;
   exercisesNav: string;
@@ -53,6 +56,8 @@ const en: Messages = {
     description: "Interval timer with a live motion guide for knee, core, upper-body and posture exercises.",
   },
   language: "Language",
+  theme: "Theme",
+  themes: { volt: "Volt", ember: "Ember", glacier: "Glacier", rose: "Rose", gold: "Gold", mono: "Mono", plum: "Plum", forest: "Forest", light: "Light", sand: "Sand" },
   filterByDifficulty: "Filter by difficulty",
   allLevels: "All levels",
   exercisesNav: "Exercises",
@@ -103,6 +108,8 @@ const he: Messages = {
     description: "טיימר אינטרוולים עם מדריך תנועה חי לתרגילי ברך, ליבה, גוף עליון ויציבה.",
   },
   language: "שפה",
+  theme: "ערכת נושא",
+  themes: { volt: "וולט", ember: "גחלת", glacier: "קרחון", rose: "ורד", gold: "זהב", mono: "מונו", plum: "שזיף", forest: "יער", light: "בהיר", sand: "חול" },
   filterByDifficulty: "סינון לפי רמת קושי",
   allLevels: "כל הרמות",
   exercisesNav: "תרגילים",
