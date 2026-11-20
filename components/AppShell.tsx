@@ -37,10 +37,12 @@ export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(true);
   useEffect(() => { setMenuOpen(!training); }, [training]);
 
-  // Swipe the catalog toward its own edge (left in LTR, right in RTL) to close it. Touch/pen only.
+  // Swipe anywhere on the screen: toward the catalog's edge (left in LTR, right in RTL) closes it, the other way opens it.
+  // Touch/pen only, desktop/landscape only, and only for clearly horizontal swipes so scrolling is untouched.
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const swipeStart = (e: PointerEvent) => {
-    swipe.current = e.pointerType === "mouse" ? null : { x: e.clientX, y: e.clientY };
+    const skip = e.pointerType === "mouse" || !window.matchMedia("(min-width: 1024px)").matches || (e.target as HTMLElement).closest("input, textarea, select, [data-no-swipe]");
+    swipe.current = skip ? null : { x: e.clientX, y: e.clientY };
   };
   const swipeEnd = (e: PointerEvent) => {
     const s = swipe.current;
@@ -48,27 +50,9 @@ export default function AppShell() {
     if (!s) return;
     const dx = e.clientX - s.x;
     const dy = e.clientY - s.y;
-    const toward = getComputedStyle(e.currentTarget).direction === "rtl" ? dx : -dx;
-    if (toward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(false);
-  };
-
-  // Swipe inward from the catalog's screen edge (left in LTR, right in RTL) to open it. Desktop/landscape only.
-  const edge = useRef<{ x: number; y: number } | null>(null);
-  const edgeStart = (e: PointerEvent) => {
-    edge.current = null;
-    if (menuOpen || e.pointerType === "mouse" || !window.matchMedia("(min-width: 1024px)").matches) return;
-    const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
-    const fromEdge = rtl ? window.innerWidth - e.clientX : e.clientX;
-    if (fromEdge <= 48) edge.current = { x: e.clientX, y: e.clientY };
-  };
-  const edgeEnd = (e: PointerEvent) => {
-    const s = edge.current;
-    edge.current = null;
-    if (!s) return;
-    const dx = e.clientX - s.x;
-    const dy = e.clientY - s.y;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
     const inward = getComputedStyle(e.currentTarget).direction === "rtl" ? -dx : dx;
-    if (inward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(true);
+    setMenuOpen(inward > 0);
   };
 
   const exercise = content.byId(exId);
@@ -114,9 +98,9 @@ export default function AppShell() {
   return (
     <div
       className="mx-auto flex min-h-dvh max-w-[1800px] flex-col px-3 pb-6 pt-4 sm:px-6 md:h-dvh md:overflow-hidden md:pb-4 lg:touch-pan-y lg:pt-6"
-      onPointerDown={edgeStart}
-      onPointerUp={edgeEnd}
-      onPointerCancel={() => { edge.current = null; }}
+      onPointerDown={swipeStart}
+      onPointerUp={swipeEnd}
+      onPointerCancel={() => { swipe.current = null; }}
     >
       {/* Desktop header: always visible, so the logo never moves */}
       <div className="mb-4 hidden shrink-0 items-center justify-between gap-4 border-b border-white/10 pb-4 lg:flex">
@@ -143,10 +127,7 @@ export default function AppShell() {
         {/* Desktop catalog: width animates, inner content keeps its size so nothing reflows */}
         <aside
           id="exercise-catalog"
-          onPointerDown={swipeStart}
-          onPointerUp={swipeEnd}
-          onPointerCancel={() => { swipe.current = null; }}
-          className={`no-scrollbar touch-pan-y hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:block ${
+          className={`no-scrollbar hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:block ${
             menuOpen ? "w-72 opacity-100 lg:me-8" : "invisible w-0 opacity-0 lg:me-0"
           }`}
         >
