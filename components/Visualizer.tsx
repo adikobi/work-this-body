@@ -82,9 +82,9 @@ export default function Visualizer({ motion, cycle, playing, hold, resting, urge
     >
       <defs>
         <linearGradient id={`${uid}-floor`} x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopColor="#fff" stopOpacity="0" />
-          <stop offset="0.5" stopColor="#fff" stopOpacity="0.28" />
-          <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          <stop offset="0" style={{ stopColor: "rgb(var(--white))" }} stopOpacity="0" />
+          <stop offset="0.5" style={{ stopColor: "rgb(var(--white))" }} stopOpacity="0.28" />
+          <stop offset="1" style={{ stopColor: "rgb(var(--white))" }} stopOpacity="0" />
         </linearGradient>
         <filter id={`${uid}-glow`} x="-30%" y="-30%" width="160%" height="160%">
           <feGaussianBlur stdDeviation="5" />

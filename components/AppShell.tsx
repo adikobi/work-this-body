@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import Brand from "@/components/Brand";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useI18n } from "@/components/LocaleProvider";
 import Workout from "@/components/Workout";
 // Ids, order and categories never change with language, so logic uses the base data and display uses `content`.
@@ -124,6 +125,7 @@ export default function AppShell() {
           <p className="text-xs tabular-nums text-zinc-300">{t.todayLong(done.length, exercises.length)}</p>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeSwitcher />
           <LocaleSwitcher />
           <button
             type="button"
@@ -150,7 +152,7 @@ export default function AppShell() {
         >
           <div className="w-72 pb-8">
             <LevelChips value={level} onChange={setLevel} />
-            <nav className="mt-5 space-y-1" aria-label={t.exercisesNav}>
+            <nav className="mt-5 space-y-2" aria-label={t.exercisesNav}>
               {cats.map((c) => {
                 const list = visible.filter((e) => e.cat === c.id);
                 const isOpen = open.includes(c.id);
@@ -167,7 +169,7 @@ export default function AppShell() {
                       <span className="tabular-nums text-zinc-400">{list.filter((e) => done.includes(e.id)).length}/{list.length}</span>
                     </button>
                     {isOpen && (
-                      <ul className="mb-2 space-y-0.5">
+                      <ul className="mb-2 space-y-2">
                         {list.map((e, i) => (
                           <li key={e.id}>
                             <button
@@ -197,6 +199,7 @@ export default function AppShell() {
               <h1 className="text-xl"><Brand /></h1>
               <div className="flex items-center gap-3">
                 <p className="text-xs tabular-nums text-zinc-300">{t.todayShort(done.length, exercises.length)}</p>
+                <ThemeSwitcher />
                 <LocaleSwitcher />
               </div>
             </div>
