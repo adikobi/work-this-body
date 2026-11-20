@@ -8,6 +8,8 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
   const { t, content } = useI18n();
   const { levels, bookends } = content;
   const { muscles, steps, cues } = exercise;
+  // Optional: add `benefits?: string[]` to Exercise in lib/exercises.ts (and the translated packs) to fill the list.
+  const benefits = (exercise as unknown as { benefits?: string[] }).benefits ?? [];
   const { warmup, cooldown } = exercise.phase ? { warmup: [] as Exercise[], cooldown: [] as Exercise[] } : bookends(exercise.cat);
   return (
     <div dir="auto" className="mt-4 pb-10 md:mt-0 md:min-h-0 md:overflow-y-auto md:overscroll-contain md:pb-2 md:pe-1">
@@ -22,12 +24,6 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
                 {exercise.phase === "warmup" ? t.guide.warmup : t.guide.cooldown}
               </span>
             )}
-            {muscles.primary.map((m) => (
-              <span key={m} className="rounded-full bg-work/15 px-2.5 py-1 text-xs font-semibold text-work">{m}</span>
-            ))}
-            {muscles.secondary.map((m) => (
-              <span key={m} className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-zinc-200">{m}</span>
-            ))}
           </div>
           {exercise.alternate && <p className="mt-3 text-xs text-zinc-300">{t.guide.alternate}</p>}
         </section>
@@ -56,6 +52,47 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
           </ul>
           <p className="mt-4 text-xs leading-relaxed text-zinc-300">{t.guide.safety}</p>
         </section>
+
+        {(muscles.primary.length > 0 || muscles.secondary.length > 0 || benefits.length > 0) && (
+          <section className="p-5">
+            <h3 className={label}>{t.guide.targetsTitle}</h3>
+            <div className="mt-4 space-y-4">
+              {muscles.primary.length > 0 && (
+                <div>
+                  <p className="text-xs text-zinc-400">{t.guide.strengthens}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {muscles.primary.map((m) => (
+                      <span key={m} className="rounded-full bg-work/15 px-2.5 py-1 text-xs font-semibold text-work">{m}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {muscles.secondary.length > 0 && (
+                <div>
+                  <p className="text-xs text-zinc-400">{t.guide.alsoWorks}</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {muscles.secondary.map((m) => (
+                      <span key={m} className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-zinc-200">{m}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {benefits.length > 0 && (
+                <div>
+                  <p className="text-xs text-zinc-400">{t.guide.benefits}</p>
+                  <ul className="mt-2">
+                    {benefits.map((b) => (
+                      <li key={b} className="flex items-start gap-3 border-t border-white/10 py-2.5 text-sm font-medium text-zinc-100 first:border-t-0 first:pt-0">
+                        <span className="mt-2 h-0.5 w-3 shrink-0 bg-work" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         {(warmup.length > 0 || cooldown.length > 0) && (
           <section className="p-5">

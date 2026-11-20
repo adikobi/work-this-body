@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Visualizer from "@/components/Visualizer";
 import Guide from "@/components/Guide";
-import { PauseIcon, PlayIcon, ResetIcon, SoundOffIcon, SoundOnIcon } from "@/components/Icons";
+import { NextExerciseIcon, PauseIcon, PlayIcon, ResetIcon, SkipRestIcon, SoundOffIcon, SoundOnIcon } from "@/components/Icons";
 import { useI18n } from "@/components/LocaleProvider";
 import { setMuted, unlockAudio } from "@/lib/audio";
 import type { Category, Exercise } from "@/lib/exercises";
@@ -193,9 +193,13 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </div>
         </div>
 
-        <div className="mt-3 flex shrink-0 items-center justify-center gap-4">
-          <button type="button" className={iconBtn} onClick={t.reset} aria-label={ui.reset} disabled={t.status === "idle"}>
+        {/* One media bar: utilities on one side of Play, forward actions on the other (mirrored in RTL). */}
+        <div className="mt-3 flex shrink-0 flex-wrap items-center justify-center gap-2.5">
+          <button type="button" className={iconBtn} onClick={t.reset} aria-label={ui.reset} title={ui.reset} disabled={t.status === "idle"}>
             <ResetIcon />
+          </button>
+          <button type="button" className={iconBtn} onClick={toggleSound} aria-label={sound ? ui.muteCues : ui.unmuteCues} title={sound ? ui.muteCues : ui.unmuteCues} aria-pressed={!sound}>
+            {sound ? <SoundOnIcon /> : <SoundOffIcon />}
           </button>
           <button
             type="button"
@@ -205,23 +209,18 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           >
             {running ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <button type="button" className={iconBtn} onClick={toggleSound} aria-label={sound ? ui.muteCues : ui.unmuteCues} aria-pressed={!sound}>
-            {sound ? <SoundOnIcon /> : <SoundOffIcon />}
-          </button>
-        </div>
-
-        {/* Always rendered so the stage never jumps; buttons enable when they apply. */}
-        <div className="mt-3 flex shrink-0 items-stretch gap-2.5">
-          <button type="button" className="btn btn-secondary h-auto flex-1 whitespace-normal py-2" onClick={t.skipRest} disabled={!resting || t.status === "idle"}>
-            {ui.skipRest}
+          <button type="button" className={iconBtn} onClick={t.skipRest} aria-label={ui.skipRest} title={ui.skipRest} disabled={!resting || t.status === "idle"}>
+            <span className="flex rtl:-scale-x-100"><SkipRestIcon /></span>
           </button>
           <button
             type="button"
             onClick={onNext}
             disabled={!next}
-            className={`btn h-auto flex-1 whitespace-normal py-2 ${t.status === "done" ? "btn-primary animate-rise" : "btn-secondary"}`}
+            aria-label={t.status === "done" && next ? ui.nextExercise(next.name) : ui.skipToNext}
+            title={t.status === "done" && next ? ui.nextExercise(next.name) : ui.skipToNext}
+            className={`btn btn-icon ${t.status === "done" ? "btn-primary" : "btn-secondary"}`}
           >
-            {t.status === "done" && next ? ui.nextExercise(next.name) : ui.skipToNext}
+            <span className="flex rtl:-scale-x-100"><NextExerciseIcon /></span>
           </button>
         </div>
         <p className="sr-only" aria-live="polite">{ui.live(label, t.set, exercise.sets, side)}</p>
