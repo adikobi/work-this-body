@@ -163,7 +163,7 @@ const he: Messages = {
     bookendsHint: "הצעות לפני ואחרי סוג אימון כזה.",
     before: "לפני",
     after: "אחרי",
-    targetsTitle: "שרירי מטרה ויתרונות",
+    targetsTitle: "על מה אנחנו עובדים?",
     strengthens: "מחזק",
     alsoWorks: "עובד גם על",
     benefits: "יתרונות",
