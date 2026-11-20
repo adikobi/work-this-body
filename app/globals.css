@@ -2,7 +2,187 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+/* Themes: colours are RGB channels so Tailwind's opacity modifiers (bg-work/20) keep working. */
+:root {
+  --ink-950: 7 9 8;
+  --ink-900: 12 15 13;
+  --ink-800: 20 25 22;
+  --ink-700: 29 36 31;
+  --work: 201 242 92;
+  --rest: 92 200 242;
+  --warn: 255 122 89;
+  --on-accent: 7 9 8;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="ember"] {
+  --ink-950: 11 8 7;
+  --ink-900: 18 13 10;
+  --ink-800: 27 20 16;
+  --ink-700: 38 28 22;
+  --work: 255 138 61;
+  --rest: 63 200 180;
+  --warn: 255 77 106;
+  --on-accent: 11 8 7;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="glacier"] {
+  --ink-950: 6 10 16;
+  --ink-900: 10 17 26;
+  --ink-800: 17 26 38;
+  --ink-700: 26 38 53;
+  --work: 124 196 255;
+  --rest: 110 231 200;
+  --warn: 255 143 107;
+  --on-accent: 6 10 16;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="rose"] {
+  --ink-950: 10 8 9;
+  --ink-900: 18 16 17;
+  --ink-800: 26 23 24;
+  --ink-700: 37 33 34;
+  --work: 255 127 158;
+  --rest: 125 211 192;
+  --warn: 255 180 84;
+  --on-accent: 10 8 9;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="gold"] {
+  --ink-950: 9 9 7;
+  --ink-900: 16 15 12;
+  --ink-800: 24 23 17;
+  --ink-700: 35 33 26;
+  --work: 245 183 61;
+  --rest: 111 195 223;
+  --warn: 255 107 74;
+  --on-accent: 9 9 7;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="mono"] {
+  --ink-950: 0 0 0;
+  --ink-900: 10 10 10;
+  --ink-800: 20 20 20;
+  --ink-700: 31 31 31;
+  --work: 244 244 245;
+  --rest: 156 163 175;
+  --warn: 255 107 90;
+  --on-accent: 0 0 0;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="plum"] {
+  --ink-950: 13 7 13;
+  --ink-900: 21 12 21;
+  --ink-800: 30 18 30;
+  --ink-700: 42 26 42;
+  --work: 240 138 208;
+  --rest: 143 214 196;
+  --warn: 255 176 77;
+  --on-accent: 13 7 13;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="forest"] {
+  --ink-950: 6 10 7;
+  --ink-900: 10 17 12;
+  --ink-800: 17 26 19;
+  --ink-700: 26 38 29;
+  --work: 61 220 151;
+  --rest: 107 196 240;
+  --warn: 255 162 77;
+  --on-accent: 6 10 7;
+  --white: 255 255 255;
+  --z50: 250 250 250;
+  --z100: 244 244 245;
+  --z200: 228 228 231;
+  --z300: 212 212 216;
+  --z400: 161 161 170;
+  --z500: 113 113 122;
+  color-scheme: dark;
+}
+[data-theme="light"] {
+  --ink-950: 246 245 241;
+  --ink-900: 255 255 255;
+  --ink-800: 239 237 231;
+  --ink-700: 228 225 217;
+  --work: 47 122 31;
+  --rest: 8 114 154;
+  --warn: 194 65 12;
+  --on-accent: 255 255 255;
+  --white: 0 0 0;
+  --z50: 20 22 26;
+  --z100: 27 30 34;
+  --z200: 42 46 51;
+  --z300: 66 72 81;
+  --z400: 91 97 107;
+  --z500: 115 122 133;
+  color-scheme: light;
+}
+[data-theme="sand"] {
+  --ink-950: 243 237 226;
+  --ink-900: 251 247 239;
+  --ink-800: 234 226 211;
+  --ink-700: 222 212 194;
+  --work: 180 73 31;
+  --rest: 31 122 109;
+  --warn: 179 38 30;
+  --on-accent: 255 255 255;
+  --white: 0 0 0;
+  --z50: 20 22 26;
+  --z100: 27 30 34;
+  --z200: 42 46 51;
+  --z300: 66 72 81;
+  --z400: 91 97 107;
+  --z500: 115 122 133;
+  color-scheme: light;
+}
 
 /* Fonts. layout.tsx loads one variable per face; these two are what Tailwind's font-display / font-sans read. */
 :root {
@@ -21,13 +201,13 @@ html[lang="he"] {
 /* Letter-spacing pulls Hebrew letters apart and hurts legibility, so undo Tailwind's tracking-* there (not on the wordmark). */
 html[lang="he"] [class*="tracking-"]:not(.brand) { letter-spacing: normal; }
 
-html { -webkit-text-size-adjust: 100%; background: #070908; }
+html { -webkit-text-size-adjust: 100%; background: rgb(var(--ink-950)); }
 
+/* Flat ground: no glow, no gradient. */
 body {
   min-height: 100dvh;
-  color: #e4e7e2;
-  background-color: #070908;
-  /* Flat ground: no glow, no gradient. */
+  color: rgb(var(--z200));
+  background-color: rgb(var(--ink-950));
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
@@ -36,41 +216,41 @@ body {
 }
 
 /* Visible keyboard focus everywhere */
-:focus-visible { outline: 2px solid #c9f25c; outline-offset: 2px; }
+:focus-visible { outline: 2px solid rgb(var(--work)); outline-offset: 2px; }
 
-::selection { background: rgba(201, 242, 92, 0.3); }
+::selection { background: rgb(var(--work) / 0.3); }
 
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* One button family: primary (lime) and secondary (grey); .btn-on marks a selected toggle. */
+/* One button family. Sizes: 44px (default and chips), 48px icon, 64px primary round. Primary = accent, secondary = grey, .btn-on = selected toggle. */
 @layer components {
   .btn {
     display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 0.375rem;
     min-height: 2.75rem; padding: 0 1.25rem; border-radius: 9999px;
     font-size: 0.875rem; font-weight: 600; line-height: 1; white-space: nowrap;
-    transition: background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), color 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+    transition: background-color 150ms cubic-bezier(0.23, 1, 0.32, 1), color 150ms cubic-bezier(0.23, 1, 0.32, 1), transform 150ms cubic-bezier(0.23, 1, 0.32, 1), filter 150ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   .btn:hover { transform: translateY(-1px); }
   .btn:active { transform: scale(0.97); }
   .btn:disabled { opacity: 0.3; pointer-events: none; }
-  .btn-primary { background: #c9f25c; color: #070908; }
-  .btn-primary:hover { background: #d8f77f; }
-  .btn-secondary { background: rgba(255, 255, 255, 0.08); color: #f4f4f5; }
-  .btn-secondary:hover { background: rgba(255, 255, 255, 0.14); }
-  .btn-on, .btn-on:hover { background: rgba(201, 242, 92, 0.18); color: #c9f25c; }
-  .btn-sm { padding: 0 0.75rem; font-size: 0.75rem; }
+  .btn-primary { background: rgb(var(--work)); color: rgb(var(--on-accent)); }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-secondary { background: rgb(var(--white) / 0.08); color: rgb(var(--z100)); }
+  .btn-secondary:hover { background: rgb(var(--white) / 0.14); }
+  .btn-on, .btn-on:hover { background: rgb(var(--work) / 0.18); color: rgb(var(--work)); }
+  .btn-sm { padding: 0 0.875rem; font-size: 0.8125rem; }
   .btn-icon { width: 3rem; height: 3rem; min-height: 0; padding: 0; }
   .btn-round { width: 4rem; height: 4rem; min-height: 0; padding: 0; }
 }
 
 /* Motion-study sheet: a drafting grid that fades out toward the edges, behind the figure. */
-.sheet { isolation: isolate; background-color: #070908; }
+.sheet { isolation: isolate; background-color: rgb(var(--ink-950)); }
 .sheet::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(rgb(var(--white) / 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--white) / 0.06) 1px, transparent 1px);
   background-size: 24px 24px; background-position: center;
   -webkit-mask-image: radial-gradient(ellipse at center, #000 35%, transparent 85%);
   mask-image: radial-gradient(ellipse at center, #000 35%, transparent 85%);
@@ -79,13 +259,6 @@ body {
 /* Reduced motion: keep fades, drop movement. */
 @media (prefers-reduced-motion: reduce) {
   .animate-rise, .animate-pop { animation: none; }
+  .btn:hover, .btn:active { transform: none; }
   * { scroll-behavior: auto !important; }
-}
-
-/* Honour reduced transparency / higher contrast for the glass stage */
-@media (prefers-reduced-transparency: reduce) {
-  .glass { backdrop-filter: none !important; background-color: #0c0f0d !important; }
-}
-@media (prefers-contrast: more) {
-  .glass { border-color: rgba(255, 255, 255, 0.6) !important; }
 }
