@@ -30,6 +30,8 @@ export interface Messages {
   muteCues: string;
   unmuteCues: string;
   nextExercise: (name: string) => string;
+  skipRest: string;
+  skipToNext: string;
   live: (label: string, set: number, total: number, side: string | null) => string;
   spaceHint: string;
   secs: (n: number) => string;
@@ -81,6 +83,8 @@ const en: Messages = {
   muteCues: "Mute cues",
   unmuteCues: "Unmute cues",
   nextExercise: (name) => `Next: ${name} →`,
+  skipRest: "Skip rest",
+  skipToNext: "Next exercise →",
   live: (label, set, total, side) => `${label}, set ${set} of ${total}${side ? `, ${side} side` : ""}`,
   spaceHint: "Press Space to start or pause",
   secs: (n) => `${n}s`,
@@ -133,6 +137,8 @@ const he: Messages = {
   muteCues: "השתקת צלילי הטיימר",
   unmuteCues: "הפעלת צלילי הטיימר",
   nextExercise: (name) => `הבא: ${name} ←`, // the arrow points the way the text reads
+  skipRest: "דלגו על המנוחה",
+  skipToNext: "לתרגיל הבא ←",
   live: (label, set, total, side) => `${label}, סט ${set} מתוך ${total}${side ? `, צד ${side}` : ""}`,
   spaceHint: "לחצו על מקש הרווח (Space) כדי להתחיל או להשהות",
   secs: (n) => `${n} שנ׳`,
