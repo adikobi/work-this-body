@@ -35,6 +35,11 @@ export default function AppShell() {
   // Desktop catalog column: open while idle, slides shut once an exercise is running (the user can reopen it).
   const [training, setTraining] = useState(false);
   const [menuOpen, setMenuOpen] = useState(true);
+  // Auto-continue: when an exercise finishes, move to the next one and start it. Remembered between visits.
+  const [auto, setAuto] = useState(false);
+  const [autoStart, setAutoStart] = useState(false);
+  useEffect(() => { setAuto(read("wtb:auto") === "1"); }, []);
+  const changeAuto = useCallback((on: boolean) => { setAuto(on); write("wtb:auto", on ? "1" : "0"); }, []);
   useEffect(() => { setMenuOpen(!training); }, [training]);
 
   // Swipe anywhere on the screen: toward the catalog's edge (left in LTR, right in RTL) closes it, the other way opens it.
@@ -61,6 +66,7 @@ export default function AppShell() {
 
   const select = useCallback((id: string, updateHash = true) => {
     const ex = baseById(id);
+    setAutoStart(false); // picking an exercise by hand never auto-starts it
     setExId(ex.id);
     setOpen((o) => (o.includes(ex.cat) ? o : [...o, ex.cat]));
     if (updateHash) window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}#${ex.id}`);
@@ -92,6 +98,11 @@ export default function AppShell() {
   const vi = visible.findIndex((e) => e.id === exercise.id);
   const next = vi >= 0 ? visible[vi + 1] : undefined;
   const cats = categories.filter((c) => visible.some((e) => e.cat === c.id));
+  const goNext = useCallback((viaAuto?: boolean) => {
+    if (!next) return;
+    select(next.id);
+    setAutoStart(!!viaAuto);
+  }, [next, select]);
   const toggleCat = (id: string) => setOpen((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
   const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label={t.completedToday}>✓</span> : null);
 
@@ -212,7 +223,10 @@ export default function AppShell() {
             exercise={exercise}
             category={category}
             next={next}
-            onNext={() => next && select(next.id)}
+            onNext={goNext}
+            autoStart={autoStart}
+            auto={auto}
+            onAutoChange={changeAuto}
             onComplete={complete}
             onTrainingChange={setTraining}
           />
