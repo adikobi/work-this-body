@@ -4,7 +4,9 @@ import Brand from "@/components/Brand";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useI18n } from "@/components/LocaleProvider";
+import Trainer from "@/components/Trainer";
 import Workout from "@/components/Workout";
+import { trainerText } from "@/lib/i18n/trainer";
 // Ids, order and categories never change with language, so logic uses the base data and display uses `content`.
 import { byId as baseById, levelOrder, type Level } from "@/lib/exercises";
 import { read, today, write } from "@/lib/storage";
@@ -26,8 +28,13 @@ function LevelChips({ value, onChange }: { value: LevelFilter; onChange: (l: Lev
 }
 
 export default function AppShell() {
-  const { t, content } = useI18n();
+  const { t, content, locale } = useI18n();
+  const tr = trainerText[locale];
   const { exercises, categories } = content;
+  // Personal trainer: an ordered list of exercise ids for today. While set, it replaces the catalog and drives "next".
+  const [plan, setPlan] = useState<string[] | null>(null);
+  const [trainerOpen, setTrainerOpen] = useState(false);
+  const [runKey, setRunKey] = useState(0);
   const [exId, setExId] = useState(exercises[0].id);
   const [open, setOpen] = useState<string[]>([exercises[0].cat]);
   const [done, setDone] = useState<string[]>([]);
@@ -94,7 +101,7 @@ export default function AppShell() {
     });
   }, [key]);
 
-  const visible = exercises.filter((e) => level === "all" || e.level === level);
+  const visible = plan ? plan.map((id) => content.byId(id)) : exercises.filter((e) => level === "all" || e.level === level);
   const vi = visible.findIndex((e) => e.id === exercise.id);
   const next = vi >= 0 ? visible[vi + 1] : undefined;
   const cats = categories.filter((c) => visible.some((e) => e.cat === c.id));
@@ -103,8 +110,36 @@ export default function AppShell() {
     select(next.id);
     setAutoStart(!!viaAuto);
   }, [next, select]);
-  const toggleCat = (id: string) => setOpen((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
   const tick = (id: string) => (done.includes(id) ? <span className="text-work" aria-label={t.completedToday}>✓</span> : null);
+  const startPlan = useCallback((ids: string[]) => {
+    setPlan(ids);
+    setTrainerOpen(false);
+    setRunKey((k) => k + 1);
+    changeAuto(true); // a session flows from one exercise to the next
+    select(ids[0]);
+    setAutoStart(true);
+  }, [changeAuto, select]);
+  const endPlan = () => { setPlan(null); setAutoStart(false); setRunKey((k) => k + 1); };
+  const trainerBtn = (cls: string) => (
+    <button type="button" className={`btn btn-secondary ${cls} ${plan ? "btn-on" : ""}`} onClick={() => setTrainerOpen(true)}>{tr.open}</button>
+  );
+  const sessionList = plan && (
+    <div>
+      <p className="px-3 text-xs font-semibold uppercase tracking-widest text-zinc-300">{tr.session(Math.max(1, vi + 1), plan.length)}</p>
+      <ol className="mt-3 space-y-2">
+        {plan.map((id, i) => (
+          <li key={`${id}-${i}`}>
+            <button type="button" onClick={() => select(id)} aria-current={id === exId} className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-start text-sm transition-[background-color,color] duration-150 ease-snap ${id === exId ? "bg-white/10 font-semibold text-zinc-50" : "text-zinc-200 hover:bg-white/5"}`}>
+              <span className="flex min-w-0 items-baseline gap-3"><span className="w-5 shrink-0 text-xs tabular-nums text-zinc-500">{String(i + 1).padStart(2, "0")}</span>{content.byId(id).name}</span>
+              {tick(id)}
+            </button>
+          </li>
+        ))}
+      </ol>
+      <button type="button" className="btn btn-secondary mt-4 w-full" onClick={endPlan}>{tr.end}</button>
+    </div>
+  );
+  const toggleCat = (id: string) => setOpen((o) => (o.includes(id) ? o.filter((x) => x !== id) : [...o, id]));
 
   return (
     <div
@@ -122,6 +157,7 @@ export default function AppShell() {
         <div className="flex items-center gap-3">
           <ThemeSwitcher />
           <LocaleSwitcher />
+          {trainerBtn("")}
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
@@ -143,8 +179,9 @@ export default function AppShell() {
           }`}
         >
           <div className="w-72 pb-8">
-            <LevelChips value={level} onChange={setLevel} />
-            <nav className="mt-5 space-y-2" aria-label={t.exercisesNav}>
+            {sessionList}
+            {!plan && <LevelChips value={level} onChange={setLevel} />}
+            {!plan && <nav className="mt-5 space-y-2" aria-label={t.exercisesNav}>
               {cats.map((c) => {
                 const list = visible.filter((e) => e.cat === c.id);
                 const isOpen = open.includes(c.id);
@@ -180,7 +217,7 @@ export default function AppShell() {
                   </div>
                 );
               })}
-            </nav>
+            </nav>}
           </div>
         </aside>
 
@@ -195,6 +232,11 @@ export default function AppShell() {
                 <LocaleSwitcher />
               </div>
             </div>
+            <div className="mb-3 flex gap-2">
+              {trainerBtn("btn-sm")}
+              {plan && <button type="button" className="btn btn-secondary btn-sm" onClick={endPlan}>{tr.end}</button>}
+            </div>
+            {!plan && <>
             <div className="no-scrollbar -mx-3 mb-2 overflow-x-auto px-3 pb-1"><LevelChips value={level} onChange={setLevel} /></div>
             <div className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-2">
               {cats.map((c) => (
@@ -216,10 +258,18 @@ export default function AppShell() {
                 </button>
               ))}
             </div>
+            </>}
+            {plan && (
+              <div className="no-scrollbar -mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-2">
+                {visible.map((e) => (
+                  <button key={e.id} type="button" className={`btn btn-secondary btn-sm ${e.id === exId ? "btn-on" : ""}`} onClick={() => select(e.id)}>{tick(e.id)}{e.name}</button>
+                ))}
+              </div>
+            )}
           </div>
 
           <Workout
-            key={exercise.id}
+            key={`${exercise.id}-${runKey}`}
             exercise={exercise}
             category={category}
             next={next}
@@ -232,6 +282,7 @@ export default function AppShell() {
           />
         </main>
       </div>
+      {trainerOpen && <Trainer onStart={startPlan} onClose={() => setTrainerOpen(false)} />}
     </div>
   );
 }

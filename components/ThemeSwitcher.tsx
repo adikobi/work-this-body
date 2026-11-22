@@ -39,13 +39,13 @@ export default function ThemeSwitcher() {
     <div ref={box} className="relative">
       <button
         type="button"
-        className="btn btn-secondary btn-icon"
+        className="btn btn-secondary btn-square"
         onClick={() => setOpen((o) => !o)}
         aria-label={t.theme}
         aria-haspopup="true"
         aria-expanded={open}
       >
-        <span className="h-6 w-6 rounded-full border border-white/30" style={{ background: dot(current) }} />
+        <span className="h-5 w-5 rounded-full border border-white/30" style={{ background: dot(current) }} />
       </button>
       {open && (
         <div className="animate-rise absolute end-0 top-full z-50 mt-2 w-72 rounded-2xl border border-white/10 bg-ink-800 p-3">
