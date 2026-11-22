@@ -6,9 +6,28 @@ import { messages } from "@/lib/i18n/messages";
 import { THEMES, THEME_KEY, defaultTheme } from "@/lib/theme";
 import "./globals.css";
 
-const displayEn = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display-en", display: "swap", preload: false });
-const bodyEn = Instrument_Sans({ subsets: ["latin"], variable: "--font-body-en", display: "swap", preload: false });
-const heebo = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-he", display: "swap", weight: ["400", "500", "600", "700", "800"] });
+const displayEn = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-display-en",
+  display: "swap",
+  preload: false,
+});
+
+const bodyEn = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body-en",
+  display: "swap",
+  preload: false,
+});
+
+const heebo = Heebo({
+  subsets: ["hebrew", "latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-he",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: messages[defaultLocale].meta.title,
