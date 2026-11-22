@@ -2,25 +2,22 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import Brand from "@/components/Brand";
 import LocaleSwitcher from "@/components/LocaleSwitcher";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { useI18n } from "@/components/LocaleProvider";
 import Workout from "@/components/Workout";
 // Ids, order and categories never change with language, so logic uses the base data and display uses `content`.
 import { byId as baseById, levelOrder, type Level } from "@/lib/exercises";
 import { read, today, write } from "@/lib/storage";
 
-const pill =
-  "flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-[background-color,color,transform] duration-150 ease-snap active:scale-95";
-const on = "bg-work/20 text-work";
-const off = "bg-white/10 text-zinc-100 hover:bg-white/15";
 
 type LevelFilter = Level | "all";
 
 function LevelChips({ value, onChange }: { value: LevelFilter; onChange: (l: LevelFilter) => void }) {
   const { t, content } = useI18n();
   return (
-    <div className="flex gap-2" role="group" aria-label={t.filterByDifficulty}>
+    <div className="flex gap-2 lg:flex-wrap" role="group" aria-label={t.filterByDifficulty}>
       {(["all", ...levelOrder] as const).map((l) => (
-        <button key={l} type="button" aria-pressed={value === l} onClick={() => onChange(l)} className={`${pill} min-h-9 px-3 text-xs ${value === l ? on : off}`}>
+        <button key={l} type="button" aria-pressed={value === l} onClick={() => onChange(l)} className={`btn btn-secondary btn-sm ${value === l ? "btn-on" : ""}`}>
           {l === "all" ? t.allLevels : content.levels[l].label}
         </button>
       ))}
@@ -40,10 +37,12 @@ export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(true);
   useEffect(() => { setMenuOpen(!training); }, [training]);
 
-  // Swipe the catalog toward its own edge (left in LTR, right in RTL) to close it. Touch/pen only.
+  // Swipe anywhere on the screen: toward the catalog's edge (left in LTR, right in RTL) closes it, the other way opens it.
+  // Touch/pen only, desktop/landscape only, and only for clearly horizontal swipes so scrolling is untouched.
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const swipeStart = (e: PointerEvent) => {
-    swipe.current = e.pointerType === "mouse" ? null : { x: e.clientX, y: e.clientY };
+    const skip = e.pointerType === "mouse" || !window.matchMedia("(min-width: 1024px)").matches || (e.target as HTMLElement).closest("input, textarea, select, [data-no-swipe]");
+    swipe.current = skip ? null : { x: e.clientX, y: e.clientY };
   };
   const swipeEnd = (e: PointerEvent) => {
     const s = swipe.current;
@@ -51,27 +50,9 @@ export default function AppShell() {
     if (!s) return;
     const dx = e.clientX - s.x;
     const dy = e.clientY - s.y;
-    const toward = getComputedStyle(e.currentTarget).direction === "rtl" ? dx : -dx;
-    if (toward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(false);
-  };
-
-  // Swipe inward from the catalog's screen edge (left in LTR, right in RTL) to open it. Desktop/landscape only.
-  const edge = useRef<{ x: number; y: number } | null>(null);
-  const edgeStart = (e: PointerEvent) => {
-    edge.current = null;
-    if (menuOpen || e.pointerType === "mouse" || !window.matchMedia("(min-width: 1024px)").matches) return;
-    const rtl = getComputedStyle(e.currentTarget).direction === "rtl";
-    const fromEdge = rtl ? window.innerWidth - e.clientX : e.clientX;
-    if (fromEdge <= 48) edge.current = { x: e.clientX, y: e.clientY };
-  };
-  const edgeEnd = (e: PointerEvent) => {
-    const s = edge.current;
-    edge.current = null;
-    if (!s) return;
-    const dx = e.clientX - s.x;
-    const dy = e.clientY - s.y;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
     const inward = getComputedStyle(e.currentTarget).direction === "rtl" ? -dx : dx;
-    if (inward > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) setMenuOpen(true);
+    setMenuOpen(inward > 0);
   };
 
   const exercise = content.byId(exId);
@@ -117,24 +98,25 @@ export default function AppShell() {
   return (
     <div
       className="mx-auto flex min-h-dvh max-w-[1800px] flex-col px-3 pb-6 pt-4 sm:px-6 md:h-dvh md:overflow-hidden md:pb-4 lg:touch-pan-y lg:pt-6"
-      onPointerDown={edgeStart}
-      onPointerUp={edgeEnd}
-      onPointerCancel={() => { edge.current = null; }}
+      onPointerDown={swipeStart}
+      onPointerUp={swipeEnd}
+      onPointerCancel={() => { swipe.current = null; }}
     >
       {/* Desktop header: always visible, so the logo never moves */}
-      <div className="mb-4 hidden shrink-0 items-center justify-between gap-4 lg:flex">
+      <div className="mb-4 hidden shrink-0 items-center justify-between gap-4 border-b border-white/10 pb-4 lg:flex">
         <div className="flex items-baseline gap-4">
           <h1 className="text-2xl"><Brand /></h1>
           <p className="text-xs tabular-nums text-zinc-300">{t.todayLong(done.length, exercises.length)}</p>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeSwitcher />
           <LocaleSwitcher />
           <button
             type="button"
             onClick={() => setMenuOpen((o) => !o)}
             aria-expanded={menuOpen}
             aria-controls="exercise-catalog"
-            className={`${pill} min-h-9 px-4 text-xs ${menuOpen ? on : off}`}
+            className={`btn btn-secondary ${menuOpen ? "btn-on" : ""}`}
           >
             {t.exercisesNav}
           </button>
@@ -145,16 +127,13 @@ export default function AppShell() {
         {/* Desktop catalog: width animates, inner content keeps its size so nothing reflows */}
         <aside
           id="exercise-catalog"
-          onPointerDown={swipeStart}
-          onPointerUp={swipeEnd}
-          onPointerCancel={() => { swipe.current = null; }}
-          className={`no-scrollbar touch-pan-y hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:block ${
+          className={`no-scrollbar hidden shrink-0 overflow-y-auto overflow-x-hidden transition-[width,opacity,margin,visibility] duration-300 ease-snap lg:block ${
             menuOpen ? "w-72 opacity-100 lg:me-8" : "invisible w-0 opacity-0 lg:me-0"
           }`}
         >
           <div className="w-72 pb-8">
             <LevelChips value={level} onChange={setLevel} />
-            <nav className="mt-5 space-y-1" aria-label={t.exercisesNav}>
+            <nav className="mt-5 space-y-2" aria-label={t.exercisesNav}>
               {cats.map((c) => {
                 const list = visible.filter((e) => e.cat === c.id);
                 const isOpen = open.includes(c.id);
@@ -171,8 +150,8 @@ export default function AppShell() {
                       <span className="tabular-nums text-zinc-400">{list.filter((e) => done.includes(e.id)).length}/{list.length}</span>
                     </button>
                     {isOpen && (
-                      <ul className="mb-2 space-y-0.5">
-                        {list.map((e) => (
+                      <ul className="mb-2 space-y-2">
+                        {list.map((e, i) => (
                           <li key={e.id}>
                             <button
                               type="button"
@@ -180,8 +159,8 @@ export default function AppShell() {
                               aria-current={e.id === exId}
                               className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-xl px-3 text-start text-sm transition-[background-color,color] duration-150 ease-snap ${e.id === exId ? "bg-white/10 font-semibold text-zinc-50" : "text-zinc-200 hover:bg-white/5"}`}
                             >
-                              {e.name}
-                              {tick(e.id)}
+                              <span className="flex min-w-0 items-baseline gap-3"><span className="w-5 shrink-0 text-xs tabular-nums text-zinc-500">{String(i + 1).padStart(2, "0")}</span>{e.name}</span>
+                            {tick(e.id)}
                             </button>
                           </li>
                         ))}
@@ -201,6 +180,7 @@ export default function AppShell() {
               <h1 className="text-xl"><Brand /></h1>
               <div className="flex items-center gap-3">
                 <p className="text-xs tabular-nums text-zinc-300">{t.todayShort(done.length, exercises.length)}</p>
+                <ThemeSwitcher />
                 <LocaleSwitcher />
               </div>
             </div>
@@ -210,7 +190,7 @@ export default function AppShell() {
                 <button
                   key={c.id}
                   type="button"
-                  className={`${pill} ${c.id === exercise.cat ? on : off}`}
+                  className={`btn btn-secondary ${c.id === exercise.cat ? "btn-on" : ""}`}
                   onClick={() => select(visible.find((e) => e.cat === c.id)?.id ?? exId)}
                 >
                   {c.short}
@@ -219,7 +199,7 @@ export default function AppShell() {
             </div>
             <div className="no-scrollbar -mx-3 mb-3 flex gap-2 overflow-x-auto px-3 pb-2">
               {visible.filter((e) => e.cat === exercise.cat).map((e) => (
-                <button key={e.id} type="button" className={`${pill} text-xs ${e.id === exId ? "bg-white/20 text-zinc-50" : off}`} onClick={() => select(e.id)}>
+                <button key={e.id} type="button" className={`btn btn-secondary btn-sm ${e.id === exId ? "btn-on" : ""}`} onClick={() => select(e.id)}>
                   {tick(e.id)}
                   {e.name}
                 </button>

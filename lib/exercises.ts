@@ -30,6 +30,8 @@ export interface Exercise {
   muscles: { primary: string[]; secondary: string[] };
   steps: string[];
   cues: string[];
+  /** What the exercise is good for: short points shown under "Target muscles & benefits". */
+  benefits?: string[];
   motion: Motion;
 }
 
@@ -60,6 +62,7 @@ const raw: Exercise[] = [
       "Tap lightly, then press through the step heel to stand tall. Switch legs each set.",
     ],
     cues: ["Knee over second toe", "Pelvis stays level", "Three seconds down"],
+    benefits: ["Builds control for walking downhill and down stairs", "Strengthens the muscles that steady the knee", "Trains hip and knee to work together"],
     motion: {
       pin: { joint: "ankleF", x: 60, y: 114 },
       props: [{ t: "rect", x: 30, y: 114, w: 40, h: 14 }],
@@ -78,6 +81,7 @@ const raw: Exercise[] = [
       "Lower the lifted foot, rest, then repeat on the other side.",
     ],
     cues: ["Back flat on wall", "Knee tracks over toes", "Breathe out, don't brace"],
+    benefits: ["Builds quad endurance for long climbs", "Trains each leg on its own, evening out strength", "Teaches the knee to stay steady under load"],
     motion: {
       pin: { joint: "ankleF", x: 90, y: 128 },
       props: [{ t: "line", x1: 63, y1: 14, x2: 63, y2: 128 }],
@@ -96,6 +100,7 @@ const raw: Exercise[] = [
       "Drive up through the front foot. Complete the set, then switch sides.",
     ],
     cues: ["Straight down, not forward", "Front heel heavy", "Chest proud"],
+    benefits: ["Builds strong, balanced legs one side at a time", "Improves hip stability and balance", "Strengthens thighs and glutes for climbing and stairs"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       props: [{ t: "rect", x: 36, y: 106, w: 26, h: 22 }],
@@ -114,6 +119,7 @@ const raw: Exercise[] = [
       "Hold, then return slowly to standing. Switch legs each set.",
     ],
     cues: ["One long line", "Hips square", "Eyes on a fixed point"],
+    benefits: ["Improves balance on uneven ground", "Strengthens the hips and the back of the leg", "Builds ankle and foot stability"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, -10, -45, 70, 80, 70, 80], [105, 0, 0, -100, -100, 95, 100, 95, 100]],
@@ -132,6 +138,7 @@ const raw: Exercise[] = [
       "Return and alternate sides. Stop short if your back arches.",
     ],
     cues: ["Back stays glued down", "Exhale on the reach", "Slow beats big"],
+    benefits: ["Teaches the core to stay steady while the limbs move", "Protects the lower back", "Builds deep core control without straining the neck"],
     motion: {
       pin: { joint: "hip", x: 112, y: 124 },
       keys: [
@@ -154,6 +161,7 @@ const raw: Exercise[] = [
       "If your back peels off, bend the knees or raise the legs higher.",
     ],
     cues: ["Ribs pulled to hips", "Lower back stays down", "Biceps by the ears"],
+    benefits: ["Builds strong abs and full-body tension", "Teaches a flat, braced lower back", "Improves trunk control for harder core moves"],
     motion: {
       pin: { joint: "hip", x: 100, y: 122 },
       keys: [[-100, 125, 105, 125, 105, -100, -100, -100, -100], [-108, 122, 122, 122, 122, -108, -108, -108, -108]],
@@ -171,6 +179,7 @@ const raw: Exercise[] = [
       "Return with control and alternate sides.",
     ],
     cues: ["Flat, level back", "Reach, don't lift", "Pause one beat"],
+    benefits: ["Strengthens the muscles that support the spine", "Improves balance and coordination", "Builds back and glute strength with low joint stress"],
     motion: {
       pin: { joint: "hip", x: 82, y: 98 },
       keys: [
@@ -194,6 +203,7 @@ const raw: Exercise[] = [
       "Press away until your arms are straight. Lower the incline to make it harder.",
     ],
     cues: ["Plank from head to heel", "Elbows tucked 45°", "Chest to the bench"],
+    benefits: ["Builds chest, shoulder and arm strength", "Easier on the wrists and shoulders than floor push-ups", "A stepping stone toward full push-ups"],
     motion: {
       pin: { joint: "wristF", x: 126, y: 92 },
       props: [{ t: "rect", x: 118, y: 92, w: 44, h: 36 }],
@@ -212,6 +222,7 @@ const raw: Exercise[] = [
       "Ease off slowly for the last second, then repeat.",
     ],
     cues: ["Shoulders down and back", "Squeeze from the chest", "Keep breathing"],
+    benefits: ["Tones the chest without any equipment", "Teaches you to feel the chest muscles working", "Gentle on the shoulders"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 0, 0, 40, 100, 40, 100], [178, 0, 0, 0, 0, 70, 100, 70, 100]],
@@ -229,6 +240,7 @@ const raw: Exercise[] = [
       "Release forward with control. Do not arch your lower back.",
     ],
     cues: ["Blades to back pockets", "Neck long", "Ribs stay down"],
+    benefits: ["Counters rounded shoulders", "Wakes up the muscles between the shoulder blades", "Supports upright sitting and standing posture"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[178, 0, 0, 0, 0, 85, 90, 85, 90], [180, 0, 0, 0, 0, -65, 70, -65, 70]],
@@ -247,6 +259,7 @@ const raw: Exercise[] = [
       "W: bend elbows to form a W, pull blades together, then lower. Cycle smoothly.",
     ],
     cues: ["Thumbs up", "Lift from the back, not the neck", "Light, tiny range"],
+    benefits: ["Builds endurance in the upper-back muscles", "Improves shoulder posture and stability", "Balances all the pushing work for the chest"],
     motion: {
       pin: { joint: "hip", x: 118, y: 124 },
       keys: [
@@ -268,6 +281,7 @@ const raw: Exercise[] = [
       "Hold, then lower with control.",
     ],
     cues: ["Hands barely pressing", "Long neck", "Glutes on"],
+    benefits: ["Strengthens the muscles that straighten the back", "Opens the chest and front of the body", "Helps counter long hours of sitting"],
     motion: {
       pin: { joint: "hip", x: 120, y: 124 },
       keys: [[-98, 90, 90, 90, 90, 70, -80, 70, -80], [-135, 90, 90, 90, 90, 10, -15, 10, -15]],
@@ -285,6 +299,7 @@ const raw: Exercise[] = [
       "Press back overhead slowly without letting the ribs flare.",
     ],
     cues: ["Rip the towel apart", "Elbows to ribs", "Ribs down"],
+    benefits: ["Activates the back muscles without bands or weights", "Improves pulling strength and posture", "Easy to do anywhere"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 0, 0, 172, 176, 172, 176], [180, 0, 0, 0, 0, -20, 165, -20, 165]],
@@ -297,6 +312,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Calves", "Core"] },
     steps: ["Stand tall with arms forward for balance.", "Step one foot back and lower until the front thigh is near parallel.", "Keep the front shin vertical and your torso upright.", "Push through the front heel to return. Alternate legs each rep."],
     cues: ["Shin stays vertical", "Back knee hovers", "Push through the heel"],
+    benefits: ["Builds single-leg strength with less strain on the knee", "Strengthens thighs and glutes", "Improves balance and control"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -312,6 +328,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Core", "Calves"] },
     steps: ["Sit near the front of a sturdy chair, feet hip-width apart.", "Lean forward slightly and stand up over three seconds, pressing through your heels.", "Pause tall, squeezing your glutes.", "Sit back slowly over three seconds. Lightly touch the seat, don't drop."],
     cues: ["Heels heavy", "Knees over toes", "Slow on the way down"],
+    benefits: ["Strengthens the movement you use every day", "Builds thigh and glute strength", "Teaches slow, knee-friendly control"],
     motion: {
       pin: { joint: "ankleF", x: 90, y: 128 },
       props: [{ t: "rect", x: 44, y: 106, w: 32, h: 5 }, { t: "line", x1: 46, y1: 72, x2: 46, y2: 106 }, { t: "line", x1: 50, y1: 111, x2: 50, y2: 128 }, { t: "line", x1: 72, y1: 111, x2: 72, y2: 128 }],
@@ -328,6 +345,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Quadriceps", "Hip flexors"], secondary: ["Core"] },
     steps: ["Lie on your back, one knee bent with the foot flat, the other leg straight.", "Tighten the thigh of the straight leg so the knee locks out.", "Lift the leg to the height of the bent knee, toes pointing up.", "Hold at the top for 2 seconds, keeping the thigh tight and the knee locked.", "Lower slowly over 3 seconds. Switch legs each set."],
     cues: ["Knee fully locked", "Pause 2s at the top", "Lower back flat"],
+    benefits: ["Strengthens the thigh without bending the knee", "Useful when deeper knee bends feel uncomfortable", "Builds hip and thigh control"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
       // down → lift → hold (two segments at the top) → lower → short rest
@@ -347,6 +365,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Transverse abdominis", "Rectus abdominis"], secondary: ["Glutes", "Shoulders", "Quads"] },
     steps: ["Set your elbows under your shoulders, forearms flat on the floor.", "Tuck your pelvis slightly and squeeze your glutes.", "Form one line from head to heels. Do not let the hips sag or pike.", "Breathe steadily and hold."],
     cues: ["Ribs down", "Squeeze glutes", "Push the floor away"],
+    benefits: ["Builds whole-trunk strength and endurance", "Supports a stable spine", "Strengthens shoulders and glutes too"],
     motion: {
       pin: { joint: "ankleF", x: 40, y: 127 },
       keys: [
@@ -362,6 +381,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Rectus abdominis", "Hip flexors"], secondary: ["Shoulders", "Quads", "Obliques"] },
     steps: ["Start in a high plank, hands under shoulders.", "Drive one knee toward your chest without lifting the hips.", "Switch legs in a steady rhythm.", "Slow the pace if your hips start to bounce."],
     cues: ["Hips low and level", "Hands stay planted", "Quick, quiet feet"],
+    benefits: ["Raises your heart rate while training the core", "Builds shoulder and hip endurance", "Improves coordination"],
     motion: {
       pin: { joint: "wristF", x: 120, y: 128 },
       keys: [
@@ -379,6 +399,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Rectus abdominis", "Obliques"], secondary: ["Hip flexors"] },
     steps: ["Lie on your back, hands lightly behind your head, shoulders lifted.", "Bring one knee in as the opposite elbow travels toward it.", "Extend the other leg long and low.", "Pedal slowly. Rotate your ribs, not just your elbows."],
     cues: ["Rotate from the ribs", "Low back stays down", "Slow pedal"],
+    benefits: ["Strengthens the abs and the sides of the waist", "Trains the core to rotate with control", "Improves coordination between upper and lower body"],
     motion: {
       pin: { joint: "hip", x: 112, y: 124 },
       keys: [
@@ -394,6 +415,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Pectoralis major", "Triceps"], secondary: ["Front deltoids", "Serratus", "Core"] },
     steps: ["Kneel with hands slightly wider than your shoulders.", "Walk your hands forward so your body is one line from head to knees.", "Lower your chest toward the floor with elbows at about 45°.", "Press back up without letting your hips sag."],
     cues: ["Line from head to knees", "Elbows 45°", "Chest to the floor"],
+    benefits: ["Builds chest, shoulder and arm strength", "A shorter lever makes it easier to progress", "Teaches good push-up form"],
     motion: {
       pin: { joint: "wristF", x: 120, y: 128 },
       keys: [
@@ -409,6 +431,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Obliques", "Deltoids"], secondary: ["Pectorals", "Serratus", "Glutes"] },
     steps: ["Start in a high plank with feet slightly wider than hip-width.", "Lift one hand and tap the opposite shoulder.", "Keep your hips from rocking side to side.", "Alternate hands at a controlled pace."],
     cues: ["Hips stay square", "Wide feet", "Slow taps"],
+    benefits: ["Trains the core to resist twisting", "Builds shoulder stability", "Improves balance in plank positions"],
     motion: {
       pin: { joint: "hip", x: 87, y: 112 },
       keys: [
@@ -426,6 +449,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Spinal erectors", "Glute max"], secondary: ["Rear deltoids", "Hamstrings"] },
     steps: ["Lie face down, arms reaching overhead, legs long.", "Lift arms, chest and legs a few inches together.", "Keep your gaze down and the neck long.", "Lower slowly. Small range is enough."],
     cues: ["Long neck", "Reach, don't crank", "Squeeze glutes"],
+    benefits: ["Builds endurance in the back muscles", "Strengthens the glutes and back of the shoulders", "Works the back without loading the spine"],
     motion: {
       pin: { joint: "hip", x: 118, y: 124 },
       keys: [
@@ -441,6 +465,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Glute max", "Hamstrings"], secondary: ["Rear deltoids", "Triceps", "Spinal erectors"] },
     steps: ["Sit with legs long, hands behind you with fingers pointing forward.", "Press the floor away and lift your hips.", "Make one line from shoulders to heels, chest open.", "Keep your neck neutral and hold."],
     cues: ["Hips high", "Chest open", "Shoulders away from ears"],
+    benefits: ["Strengthens the whole back of the body", "Opens the chest and front of the shoulders", "Improves posture"],
     motion: {
       pin: { joint: "wristF", x: 60, y: 128 },
       keys: [
@@ -456,6 +481,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Hamstrings", "Spinal erectors"], secondary: ["Glute max", "Core"] },
     steps: ["Stand with feet hip-width apart, knees soft, hands folded across your chest.", "Push your hips back as your torso tips forward.", "Keep your back flat, stopping when you feel the hamstrings load.", "Drive the hips forward to stand tall."],
     cues: ["Hips go back", "Flat back", "Squeeze glutes at the top"],
+    benefits: ["Teaches bending from the hips, not the spine", "Strengthens hamstrings and lower back", "Protects the back during lifting and daily bending"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -471,6 +497,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Glute max", "Hamstrings"], secondary: ["Core", "Adductors"] },
     steps: ["Lie on your back, knees bent, feet flat hip-width apart.", "Press through your heels and lift your hips until shoulders, hips and knees line up.", "Squeeze your glutes at the top without arching your back.", "Lower slowly."],
     cues: ["Push through heels", "Ribs down", "Squeeze at the top"],
+    benefits: ["Strengthens the glutes and hamstrings", "Wakes up glutes that switch off from sitting", "A gentle base for every hip exercise"],
     motion: {
       pin: { joint: "ankleF", x: 120, y: 128 },
       keys: [
@@ -486,6 +513,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Glute max", "Glute medius"], secondary: ["Hamstrings", "Core"] },
     steps: ["Set up for a bridge, then extend one leg straight, thigh level with the other.", "Press through the planted heel and lift your hips.", "Keep your pelvis level; don't let it twist.", "Lower slowly. Switch legs each set."],
     cues: ["Pelvis level", "Heel pressing down", "Slow lowering"],
+    benefits: ["Builds strength in each leg on its own", "Improves pelvic control and stability", "Strengthens the glutes that support the knee"],
     motion: {
       pin: { joint: "ankleF", x: 120, y: 128 },
       keys: [
@@ -501,6 +529,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Glute max"], secondary: ["Hamstrings", "Core"] },
     steps: ["Start on hands and knees, back flat.", "Keeping the knee bent 90°, press one foot toward the ceiling.", "Stop when the thigh is level with your back. Do not arch.", "Lower with control and alternate."],
     cues: ["Level hips", "Press the sole up", "No arching"],
+    benefits: ["Isolates the glutes from a stable base", "Builds hip strength without loading the knees", "Easy to learn"],
     motion: {
       pin: { joint: "hip", x: 82, y: 98 },
       keys: [
@@ -518,6 +547,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Quadriceps", "Glute max"], secondary: ["Hamstrings", "Adductors", "Core"] },
     steps: ["Stand with feet shoulder-width apart, arms forward.", "Sit your hips back and down, chest tall.", "Go as deep as you can with your heels down and knees tracking over toes.", "Drive up through the whole foot."],
     cues: ["Heels down", "Knees follow toes", "Chest tall"],
+    benefits: ["Builds leg and hip strength", "Trains the movement of sitting down and standing up", "Supports knee and hip health when done with control"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -533,6 +563,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Deltoids", "Rotator cuff"], secondary: ["Upper traps", "Serratus"] },
     steps: ["Stand tall with arms straight out to the sides.", "Draw slow circles, starting small and getting bigger.", "Keep your ribs down and shoulders away from your ears.", "Reverse direction halfway."],
     cues: ["Slow and smooth", "Ribs down", "Reverse halfway"],
+    benefits: ["Warms up the shoulder joints", "Improves shoulder range of motion", "Prepares you for upper-body work"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -550,6 +581,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Lower trapezius", "Serratus"], secondary: ["Rhomboids", "Deltoids"] },
     steps: ["Stand with your back, head and hips against a wall, feet slightly forward.", "Bring your arms into a goalpost position against the wall.", "Slide them up as far as you can while keeping contact.", "Slide back down slowly."],
     cues: ["Keep contact", "Ribs down", "Smooth slide"],
+    benefits: ["Improves overhead shoulder mobility", "Strengthens the muscles that hold the shoulder blades", "Helps with slouched posture"],
     motion: {
       pin: { joint: "ankleF", x: 90, y: 128 },
       props: [{ t: "line", x1: 83, y1: 14, x2: 83, y2: 128 }],
@@ -566,6 +598,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Anterior deltoids", "Serratus"], secondary: ["Lats", "Triceps"] },
     steps: ["Stand tall, arms by your sides.", "Raise your arms forward and up, reaching long.", "Reach until the biceps are near your ears without arching.", "Lower slowly."],
     cues: ["Ribs down", "Reach tall", "Biceps by ears"],
+    benefits: ["Improves how high your arms can reach", "Gently stretches the sides of the back", "Opens the chest and shoulders"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -581,6 +614,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Pectoralis major", "Anterior deltoids"], secondary: ["Biceps", "Pectoralis minor"] },
     steps: ["Stand in a doorway with forearms on the frame, elbows at shoulder height.", "Step one foot through until you feel a stretch across the chest.", "Keep your ribs down and your neck long.", "Breathe slowly and hold."],
     cues: ["Ribs down", "Soft knees", "Breathe into the stretch"],
+    benefits: ["Opens tight chest and front-of-shoulder muscles", "Counters desk and phone slouch", "Helps shoulders sit back"],
     motion: {
       pin: { joint: "ankleF", x: 88, y: 128 },
       props: [{ t: "line", x1: 108, y1: 14, x2: 108, y2: 128 }],
@@ -597,6 +631,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Hip flexors", "Quadriceps"], secondary: ["Calves", "Core"] },
     steps: ["Stand tall and start running in place.", "Drive each knee to hip height.", "Pump your arms and land softly on the balls of your feet.", "Stay tall and keep a quick tempo."],
     cues: ["Knees to hip height", "Quiet landings", "Tall chest"],
+    benefits: ["Raises your heart rate quickly", "Warms up hips and thighs", "Builds light, springy leg coordination"],
     motion: {
       pin: { joint: "hip", x: 100, y: 84 },
       keys: [
@@ -612,6 +647,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Hamstrings"], secondary: ["Calves", "Glutes"] },
     steps: ["Jog in place, heels flicking up toward your glutes.", "Keep your thighs pointing down.", "Swing your arms naturally.", "Stay light on your feet."],
     cues: ["Heels to glutes", "Thighs point down", "Quick and light"],
+    benefits: ["Warms up the hamstrings", "Raises your heart rate", "Improves leg speed and rhythm"],
     motion: {
       pin: { joint: "hip", x: 100, y: 84 },
       keys: [
@@ -627,6 +663,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Deltoids", "Triceps"], secondary: ["Core", "Calves", "Glutes"] },
     steps: ["Stand in a staggered stance, fists by your chin.", "Throw a straight jab, then a cross, rotating your hips.", "Return your hands to guard after every punch.", "Stay light on your feet and breathe out on each punch."],
     cues: ["Hands back to guard", "Rotate the hips", "Exhale on the punch"],
+    benefits: ["Raises your heart rate with full-body movement", "Trains shoulders, arms and core together", "Improves rhythm and coordination"],
     motion: {
       pin: { joint: "ankleF", x: 95, y: 128 },
       keys: [
@@ -644,6 +681,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Hip flexors", "Quadriceps"], secondary: ["Core", "Calves"] },
     steps: ["Stand tall, arms bent at your sides.", "Lift one knee to hip height, then the other, marching steadily.", "Swing the opposite arm with each step.", "Keep your core braced and posture tall."],
     cues: ["Tall posture", "Knees to hip height", "Opposite arm swings"],
+    benefits: ["Raises your heart rate with low impact", "Warms up hips and legs gently", "Good as a first warm-up"],
     motion: {
       pin: { joint: "hip", x: 100, y: 84 },
       keys: [
@@ -659,6 +697,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Hip flexors", "Quadriceps"], secondary: ["Glutes", "Abdominals"] },
     steps: ["Kneel on one knee with the other foot flat in front.", "Tuck your pelvis under and squeeze the glute of the back leg.", "Shift your weight forward until you feel the stretch.", "Reach the same-side arm overhead. Breathe slowly."],
     cues: ["Tuck the pelvis", "Squeeze back glute", "Ribs down"],
+    benefits: ["Lengthens hip flexors tight from sitting", "Can ease pulling at the front of the hip", "Helps you stand and walk more freely"],
     motion: {
       pin: { joint: "ankleF", x: 110, y: 128 },
       keys: [
@@ -674,6 +713,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Spinal erectors", "Lats"], secondary: ["Glutes", "Shoulders"] },
     steps: ["Kneel with your big toes together and knees apart.", "Sit your hips back toward your heels.", "Walk your hands forward and rest your forehead down.", "Breathe slowly into your back."],
     cues: ["Hips back", "Long arms", "Slow breaths"],
+    benefits: ["Gently stretches back, hips and shoulders", "Helps the body relax after a workout", "Easy to hold and breathe in"],
     motion: {
       pin: { joint: "ankleF", x: 60, y: 124 },
       keys: [
@@ -689,6 +729,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Quadriceps", "Hip flexors"], secondary: ["Calves", "Core"] },
     steps: ["Stand tall, holding a wall for balance if needed.", "Bend one knee and catch the foot behind you.", "Draw your heel to your glute, knees together and pelvis tucked.", "Hold, then switch sides."],
     cues: ["Knees together", "Pelvis tucked", "Stand tall"],
+    benefits: ["Releases tight thighs after leg work", "Lengthens the front of the hip", "Helps legs feel lighter after a hike"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -704,6 +745,7 @@ const raw: Exercise[] = [
     muscles: { primary: ["Hamstrings", "Spinal erectors"], secondary: ["Calves", "Glutes"] },
     steps: ["Stand with feet hip-width apart and reach your arms overhead.", "Hinge from the hips and fold forward with soft knees.", "Let your head and arms hang heavy.", "Bend the knees if your back rounds sharply."],
     cues: ["Soft knees", "Heavy head", "Breathe out"],
+    benefits: ["Releases the hamstrings and lower back", "Takes tension out of the spine", "Calms the body after training"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [
@@ -725,6 +767,7 @@ const raw: Exercise[] = [
       "Press up the wall to stand and rest. Work toward 90° over the weeks.",
     ],
     cues: ["Shallow is fine", "Weight in the heels", "Breathe out, don't brace"],
+    benefits: ["Builds thigh endurance with both legs sharing the load", "A stepping stone to the single-leg wall sit", "Teaches the knee to stay steady under load"],
     motion: {
       pin: { joint: "ankleF", x: 88, y: 128 },
       props: [{ t: "line", x1: 63, y1: 14, x2: 63, y2: 128 }],
@@ -743,6 +786,7 @@ const raw: Exercise[] = [
       "Lower your heels over 3 seconds. When this is easy, progress to one leg at a time.",
     ],
     cues: ["Straight up, don't roll out", "Pause at the top", "Three seconds down"],
+    benefits: ["Strengthens the calves that help absorb each step", "Takes load off the knee on descents", "Builds ankle stability"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       props: [{ t: "line", x1: 132, y1: 14, x2: 132, y2: 128 }],
@@ -761,6 +805,7 @@ const raw: Exercise[] = [
       "Switch legs each set.",
     ],
     cues: ["Press the knee down", "Toes pulled back", "Breathe normally"],
+    benefits: ["Wakes up the thigh without moving the knee", "A gentle start when the knee is sensitive", "Builds the base for squats and steps"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
       keys: [[-90, 90, 90, 150, 20, 90, 90, 90, 90], [-90, 86, 86, 150, 20, 90, 90, 90, 90]],
@@ -778,6 +823,7 @@ const raw: Exercise[] = [
       "Stay in a pain-free range. Switch legs each set.",
     ],
     cues: ["Slow and smooth", "Heel stays on the floor", "Stop before it pinches"],
+    benefits: ["Gently improves knee bending", "Keeps the knee moving with little load", "Warms up the thigh and hamstring"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
       keys: [[-90, 90, 90, 150, 20, 90, 90, 90, 90], [-90, 150, 20, 150, 20, 90, 90, 90, 90]],
@@ -795,6 +841,7 @@ const raw: Exercise[] = [
       "Stand up by pressing through the whole foot.",
     ],
     cues: ["Quarter depth", "Heels down", "Knees follow toes"],
+    benefits: ["Builds comfortable squat strength", "Grooves a safe squat pattern before going deeper", "Strengthens thighs and glutes"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 0, 0, 85, 90, 85, 90], [172, 42, -14, 42, -14, 88, 90, 88, 90]],
@@ -813,6 +860,7 @@ const raw: Exercise[] = [
       "Press through the step heel to stand tall. Switch legs each set.",
     ],
     cues: ["Three seconds down", "Knee over second toe", "Light tap only"],
+    benefits: ["Builds control for downhill steps at a small height", "Strengthens thighs and the side of the hip", "Trains the knee to track steadily"],
     motion: {
       pin: { joint: "ankleF", x: 50, y: 120 },
       props: [{ t: "rect", x: 14, y: 120, w: 44, h: 8 }],
@@ -831,6 +879,7 @@ const raw: Exercise[] = [
       "Keep your knees tracking over your toes the whole way down.",
     ],
     cues: ["Five seconds down", "Hips back first", "Knees over toes"],
+    benefits: ["Builds the slow lowering that downhill steps need", "Strengthens thighs and glutes", "Teaches soft, controlled landings"],
     motion: {
       pin: { joint: "ankleF", x: 90, y: 128 },
       props: [{ t: "rect", x: 44, y: 106, w: 32, h: 5 }, { t: "line", x1: 46, y1: 72, x2: 46, y2: 106 }, { t: "line", x1: 50, y1: 111, x2: 50, y2: 128 }, { t: "line", x1: 72, y1: 111, x2: 72, y2: 128 }],
@@ -849,6 +898,7 @@ const raw: Exercise[] = [
       "Keep the steps small and quiet. Turn around and go the other way when you run out of room.",
     ],
     cues: ["Soft landing", "Small steps", "Stay tall"],
+    benefits: ["Trains quiet, soft foot placement", "Strengthens thighs and calves with light load", "Prepares the legs for descents"],
     motion: {
       pin: { joint: "hip", x: 100, y: 84 },
       keys: [[180, 25, 5, -25, -25, -20, 10, 20, 10], [180, -25, -25, 25, 5, 20, 10, -20, 10]],
@@ -866,6 +916,7 @@ const raw: Exercise[] = [
       "Hold, then switch sides. Progress by closing your eyes or standing on a folded towel.",
     ],
     cues: ["Soft knee", "Hips level", "Eyes on a point"],
+    benefits: ["Improves balance", "Builds ankle, knee and hip control", "Strengthens the muscles that steady each step"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 40, 0, 40, 50, 40, 50], [180, 0, 0, 55, 10, 40, 50, 40, 50]],
@@ -884,6 +935,7 @@ const raw: Exercise[] = [
       "Switch legs for the next set.",
     ],
     cues: ["Big, slow circles", "Move only the ankle", "Stay tall"],
+    benefits: ["Loosens the ankle joints", "Improves ankle mobility", "Prepares the legs for hike-prep work"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 30, 10, 0, 0, 0, 0], [180, 0, 0, 30, -20, 0, 0, 0, 0]],
@@ -901,6 +953,7 @@ const raw: Exercise[] = [
       "Switch legs for the next set.",
     ],
     cues: ["Relaxed pendulum", "Tall torso", "Small to bigger"],
+    benefits: ["Warms up hips and hamstrings", "Improves hip mobility", "Prepares the legs for movement"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       props: [{ t: "line", x1: 130, y1: 14, x2: 130, y2: 128 }],
@@ -919,6 +972,7 @@ const raw: Exercise[] = [
       "Flow slowly between the two with your breath.",
     ],
     cues: ["Move with the breath", "Whole spine moves", "Slow and smooth"],
+    benefits: ["Loosens the spine", "Wakes up the shoulders and hips", "Prepares the back for core and posture work"],
     motion: {
       pin: { joint: "hip", x: 82, y: 98 },
       keys: [[84, 0, -80, 0, -80, 0, 0, 0, 0], [96, 0, -80, 0, -80, 0, 0, 0, 0]],
@@ -936,6 +990,7 @@ const raw: Exercise[] = [
       "Breathe out as the arms swing forward.",
     ],
     cues: ["Loose and relaxed", "Ribs down", "Grow the swing"],
+    benefits: ["Loosens the shoulders and chest", "Warms up the upper body", "Gets the arms ready for pushing and pulling"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 0, 0, 110, 110, 110, 110], [180, 0, 0, 0, 0, -40, -40, -40, -40]],
@@ -954,6 +1009,7 @@ const raw: Exercise[] = [
       "Hold, then switch legs for the next set.",
     ],
     cues: ["Back heel down", "Back knee straight", "Toes point forward"],
+    benefits: ["Releases tight calves after leg work", "Helps ankles move more freely", "Good after a hike"],
     motion: {
       pin: { joint: "ankleB", x: 80, y: 128 },
       props: [{ t: "line", x1: 142, y1: 14, x2: 142, y2: 128 }],
@@ -972,6 +1028,7 @@ const raw: Exercise[] = [
       "Hold, breathing slowly, then switch legs.",
     ],
     cues: ["Lower back stays down", "Gentle, no bouncing", "Breathe out"],
+    benefits: ["Lengthens the back of the thigh", "Easy on the knees and back", "Helps legs feel looser after training"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
       keys: [[-90, 90, 90, 150, 20, 90, 90, 90, 90], [-90, 172, 172, 150, 20, 90, 90, 90, 90]],
@@ -989,6 +1046,7 @@ const raw: Exercise[] = [
       "Breathe slowly into your belly.",
     ],
     cues: ["Gentle pull", "Shoulders heavy", "Slow breaths"],
+    benefits: ["Soothes the lower back and hips", "Releases tension after core and leg work", "Easy to do on the floor"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
       keys: [[-90, 150, 20, 150, 20, 90, 90, 90, 90], [-90, 230, 110, 230, 110, 100, 150, 100, 150]],
@@ -1006,6 +1064,7 @@ const raw: Exercise[] = [
       "Hold, then switch arms for the next set.",
     ],
     cues: ["Ribs down", "Gentle pressure", "Neck long"],
+    benefits: ["Releases the back of the arm after pressing", "Gently opens the shoulder", "Helps the upper body relax"],
     motion: {
       pin: { joint: "ankleF", x: 100, y: 128 },
       keys: [[180, 0, 0, 0, 0, 10, 10, 10, 10], [180, 0, 0, 0, 0, 175, -20, 10, 10]],
@@ -1023,6 +1082,7 @@ const raw: Exercise[] = [
       "Let the shoulders, jaw and hands soften.",
     ],
     cues: ["Longer out than in", "Belly rises first", "Everything soft"],
+    benefits: ["Slows the heart rate", "Helps the body settle at the end of a workout", "Teaches slow breathing from the diaphragm"],
     motion: {
       pin: { joint: "hip", x: 110, y: 124 },
       keys: [[-90, 150, 20, 150, 20, 90, 90, 90, 90], [-88, 150, 20, 150, 20, 90, 90, 90, 90]],

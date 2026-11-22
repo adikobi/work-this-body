@@ -42,6 +42,7 @@ function build(pack: ContentPack): Content {
       tagline: t.tagline,
       steps: t.steps,
       cues: t.cues,
+      benefits: t.benefits ?? e.benefits,
       muscles: { primary: e.muscles.primary.map(translate), secondary: e.muscles.secondary.map(translate) },
     };
   });

@@ -1,9 +1,12 @@
 import type { Locale } from "./config";
+import type { ThemeId } from "../theme";
 
 /** Every UI string that isn't exercise content. Functions take the dynamic parts so word order can differ per language. */
 export interface Messages {
   meta: { title: string; description: string };
   language: string;
+  theme: string;
+  themes: Record<ThemeId, string>;
   filterByDifficulty: string;
   allLevels: string;
   exercisesNav: string;
@@ -27,6 +30,8 @@ export interface Messages {
   muteCues: string;
   unmuteCues: string;
   nextExercise: (name: string) => string;
+  skipRest: string;
+  skipToNext: string;
   live: (label: string, set: number, total: number, side: string | null) => string;
   spaceHint: string;
   secs: (n: number) => string;
@@ -43,6 +48,10 @@ export interface Messages {
     bookendsHint: string;
     before: string;
     after: string;
+    targetsTitle: string;
+    strengthens: string;
+    alsoWorks: string;
+    benefits: string;
   };
   visualizerAlt: string;
 }
@@ -53,6 +62,8 @@ const en: Messages = {
     description: "Interval timer with a live motion guide for knee, core, upper-body and posture exercises.",
   },
   language: "Language",
+  theme: "Theme",
+  themes: { volt: "Volt", ember: "Ember", glacier: "Glacier", rose: "Rose", gold: "Gold", mono: "Mono", plum: "Plum", forest: "Forest", light: "Light", sand: "Sand" },
   filterByDifficulty: "Filter by difficulty",
   allLevels: "All levels",
   exercisesNav: "Exercises",
@@ -76,6 +87,8 @@ const en: Messages = {
   muteCues: "Mute cues",
   unmuteCues: "Unmute cues",
   nextExercise: (name) => `Next: ${name} →`,
+  skipRest: "Skip rest",
+  skipToNext: "Next exercise",
   live: (label, set, total, side) => `${label}, set ${set} of ${total}${side ? `, ${side} side` : ""}`,
   spaceHint: "Press Space to start or pause",
   secs: (n) => `${n}s`,
@@ -92,6 +105,10 @@ const en: Messages = {
     bookendsHint: "Suggested bookends for this kind of workout.",
     before: "Before",
     after: "After",
+    targetsTitle: "Target muscles & benefits",
+    strengthens: "Strengthens",
+    alsoWorks: "Also works",
+    benefits: "Benefits",
   },
   visualizerAlt: "Animated stick-figure demonstration of the exercise",
 };
@@ -103,6 +120,8 @@ const he: Messages = {
     description: "טיימר אינטרוולים עם מדריך תנועה חי לתרגילי ברך, ליבה, גוף עליון ויציבה.",
   },
   language: "שפה",
+  theme: "ערכת נושא",
+  themes: { volt: "וולט", ember: "גחלת", glacier: "קרחון", rose: "ורד", gold: "זהב", mono: "מונו", plum: "שזיף", forest: "יער", light: "בהיר", sand: "חול" },
   filterByDifficulty: "סינון לפי רמת קושי",
   allLevels: "כל הרמות",
   exercisesNav: "תרגילים",
@@ -126,6 +145,8 @@ const he: Messages = {
   muteCues: "השתקת צלילי הטיימר",
   unmuteCues: "הפעלת צלילי הטיימר",
   nextExercise: (name) => `הבא: ${name} ←`, // the arrow points the way the text reads
+  skipRest: "דלגו על המנוחה",
+  skipToNext: "לתרגיל הבא",
   live: (label, set, total, side) => `${label}, סט ${set} מתוך ${total}${side ? `, צד ${side}` : ""}`,
   spaceHint: "לחצו על מקש הרווח (Space) כדי להתחיל או להשהות",
   secs: (n) => `${n} שנ׳`,
@@ -142,6 +163,10 @@ const he: Messages = {
     bookendsHint: "הצעות לפני ואחרי סוג אימון כזה.",
     before: "לפני",
     after: "אחרי",
+    targetsTitle: "על מה אנחנו עובדים?",
+    strengthens: "מחזק",
+    alsoWorks: "עובד גם על",
+    benefits: "יתרונות",
   },
   visualizerAlt: "הדגמה מונפשת של התרגיל בדמות מקלות",
 };

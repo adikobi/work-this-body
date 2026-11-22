@@ -36,6 +36,18 @@ export function useIntervalTimer(cfg: Cfg) {
     commit({ ...s, status: "paused", remainingMs: Math.max(0, endRef.current - Date.now()) });
   }, [commit]);
 
+  // Jump from rest straight into the next set's work phase (works while running or paused).
+  const skipRest = useCallback(() => {
+    const s = snapRef.current;
+    const c = cfgRef.current;
+    if (s.phase !== "rest" || (s.status !== "running" && s.status !== "paused")) return;
+    const dur = c.work * 1000;
+    endRef.current = Date.now() + dur;
+    lastSecRef.current = Math.ceil(dur / 1000);
+    if (c.sound) cues.phase();
+    commit({ status: s.status, phase: "work", set: s.set + 1, remainingMs: dur });
+  }, [commit]);
+
   const reset = useCallback(() => {
     commit({ status: "idle", phase: "work", set: 1, remainingMs: cfgRef.current.work * 1000 });
   }, [commit]);
@@ -91,5 +103,5 @@ export function useIntervalTimer(cfg: Cfg) {
     return () => { window.clearInterval(id); void lock?.release().catch(() => {}); };
   }, [snap.status, commit]);
 
-  return { ...snap, start, pause, reset };
+  return { ...snap, start, pause, reset, skipRest };
 }
