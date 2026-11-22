@@ -31,6 +31,8 @@ export interface Messages {
   unmuteCues: string;
   nextExercise: (name: string) => string;
   skipRest: string;
+  autoNext: string;
+  autoNextIn: (name: string, n: number) => string;
   skipToNext: string;
   live: (label: string, set: number, total: number, side: string | null) => string;
   spaceHint: string;
@@ -49,6 +51,8 @@ export interface Messages {
     before: string;
     after: string;
     targetsTitle: string;
+    paceMoving: (seconds: number, reps: number) => string;
+    paceHold: (seconds: number) => string;
     strengthens: string;
     alsoWorks: string;
     benefits: string;
@@ -88,6 +92,8 @@ const en: Messages = {
   unmuteCues: "Unmute cues",
   nextExercise: (name) => `Next: ${name} →`,
   skipRest: "Skip rest",
+  autoNext: "Auto-continue",
+  autoNextIn: (name, n) => `Next: ${name} in ${n}…`,
   skipToNext: "Next exercise",
   live: (label, set, total, side) => `${label}, set ${set} of ${total}${side ? `, ${side} side` : ""}`,
   spaceHint: "Press Space to start or pause",
@@ -106,6 +112,8 @@ const en: Messages = {
     before: "Before",
     after: "After",
     targetsTitle: "Target muscles & benefits",
+    paceMoving: (s, n) => `Follow the figure: one full movement every ${s}s, about ${n} per set.`,
+    paceHold: (s) => `Follow the figure and hold each position steadily. Each set lasts ${s}s.`,
     strengthens: "Strengthens",
     alsoWorks: "Also works",
     benefits: "Benefits",
@@ -146,6 +154,8 @@ const he: Messages = {
   unmuteCues: "הפעלת צלילי הטיימר",
   nextExercise: (name) => `הבא: ${name} ←`, // the arrow points the way the text reads
   skipRest: "דלגו על המנוחה",
+  autoNext: "המשך אוטומטי",
+  autoNextIn: (name, n) => `הבא: ${name} בעוד ${n}…`,
   skipToNext: "לתרגיל הבא",
   live: (label, set, total, side) => `${label}, סט ${set} מתוך ${total}${side ? `, צד ${side}` : ""}`,
   spaceHint: "לחצו על מקש הרווח (Space) כדי להתחיל או להשהות",
@@ -163,7 +173,9 @@ const he: Messages = {
     bookendsHint: "הצעות לפני ואחרי סוג אימון כזה.",
     before: "לפני",
     after: "אחרי",
-    targetsTitle: "על מה אנחנו עובדים?",
+    targetsTitle: "שרירי מטרה ויתרונות",
+    paceMoving: (s, n) => `עקבו אחרי הדמות: תנועה מלאה אחת כל ${s} שנ׳, כ-${n} בכל סט.`,
+    paceHold: (s) => `עקבו אחרי הדמות והחזיקו כל תנוחה בקביעות. כל סט נמשך ${s} שנ׳.`,
     strengthens: "מחזק",
     alsoWorks: "עובד גם על",
     benefits: "יתרונות",
