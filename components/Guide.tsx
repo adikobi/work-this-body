@@ -17,6 +17,11 @@ export default function Guide({ exercise }: { exercise: Exercise }) {
       <article className="divide-y divide-white/10 rounded-3xl border border-white/10 bg-ink-900">
         <section className="p-5">
           <p className="text-sm text-zinc-50">{exercise.tagline}</p>
+          <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+            {exercise.hold
+              ? t.guide.paceHold(exercise.work)
+              : t.guide.paceMoving(Number(exercise.cycle.toFixed(1)), Math.max(1, Math.round(exercise.work / exercise.cycle)))}
+          </p>
           <div className="mt-3 flex flex-wrap gap-1.5">
             <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${levels[exercise.level].chip}`}>{levels[exercise.level].label}</span>
             {exercise.phase && (
