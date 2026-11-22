@@ -1,15 +1,33 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Heebo, Instrument_Sans, Rubik } from "next/font/google";
+import { Bricolage_Grotesque, Heebo, Instrument_Sans } from "next/font/google";
 import LocaleProvider from "@/components/LocaleProvider";
 import { LOCALE_COOKIE, defaultLocale, dirOf } from "@/lib/i18n/config";
 import { messages } from "@/lib/i18n/messages";
 import { THEMES, THEME_KEY, defaultTheme } from "@/lib/theme";
 import "./globals.css";
 
-const displayEn = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-display-en", display: "swap", preload: false });
-const bodyEn = Instrument_Sans({ subsets: ["latin"], variable: "--font-body-en", display: "swap", preload: false });
-const displayHe = Rubik({ subsets: ["hebrew", "latin"], variable: "--font-display-he", display: "swap" });
-const bodyHe = Heebo({ subsets: ["hebrew", "latin"], variable: "--font-body-he", display: "swap" });
+const displayEn = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-display-en",
+  display: "swap",
+  preload: false,
+});
+
+const bodyEn = Instrument_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body-en",
+  display: "swap",
+  preload: false,
+});
+
+const heebo = Heebo({
+  subsets: ["hebrew", "latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-he",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: messages[defaultLocale].meta.title,
@@ -69,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang={defaultLocale}
       dir={dirOf(defaultLocale)}
       suppressHydrationWarning
-      className={`${displayEn.variable} ${bodyEn.variable} ${displayHe.variable} ${bodyHe.variable}`}
+      className={`${displayEn.variable} ${bodyEn.variable} ${heebo.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrapScript }} />

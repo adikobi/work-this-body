@@ -184,16 +184,17 @@
   color-scheme: light;
 }
 
-/* Fonts. layout.tsx loads one variable per face; these two are what Tailwind's font-display / font-sans read. */
+/* Fonts. layout.tsx loads one variable per face; these two are what Tailwind's font-display / font-sans read. Hebrew uses Heebo everywhere. */
 :root {
   --font-display: var(--font-display-en);
   --font-body: var(--font-body-en);
 }
 /* Hebrew: the English faces have no Hebrew glyphs, so swap in faces that do. */
 html[lang="he"] {
-  --font-display: var(--font-display-he);
-  --font-body: var(--font-body-he);
+  --font-display: var(--font-he);
+  --font-body: var(--font-he);
 }
+html[lang="he"] body { font-family: var(--font-he), "Heebo", sans-serif; }
 
 /* The wordmark is a brand mark: same face and tracking in every language. */
 .brand { font-family: var(--font-display-en), ui-sans-serif, system-ui, sans-serif; }
@@ -223,7 +224,7 @@ body {
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* One button family. Sizes: 44px (default and chips), 48px icon, 64px primary round. Primary = accent, secondary = grey, .btn-on = selected toggle. */
+/* One button family. Rule: every control is 44px tall (default, chips, square, switchers); 48px icon and 64px round only in the media bar. Primary = accent, secondary = grey, .btn-on = selected toggle. */
 @layer components {
   .btn {
     display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 0.375rem;
@@ -239,7 +240,8 @@ body {
   .btn-secondary { background: rgb(var(--white) / 0.08); color: rgb(var(--z100)); }
   .btn-secondary:hover { background: rgb(var(--white) / 0.14); }
   .btn-on, .btn-on:hover { background: rgb(var(--work) / 0.18); color: rgb(var(--work)); }
-  .btn-sm { padding: 0 0.875rem; font-size: 0.8125rem; }
+  .btn-sm { padding: 0 0.875rem; }
+  .btn-square { width: 2.75rem; height: 2.75rem; padding: 0; }
   .btn-icon { width: 3rem; height: 3rem; min-height: 0; padding: 0; }
   .btn-round { width: 4rem; height: 4rem; min-height: 0; padding: 0; }
 }
