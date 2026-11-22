@@ -19,12 +19,15 @@ interface Props {
   exercise: Exercise;
   category: Category;
   next?: Exercise;
-  onNext: () => void;
+  onNext: (auto?: boolean) => void;
+  autoStart: boolean; // begin immediately (we arrived here from an auto-continue)
+  auto: boolean; // auto-continue setting
+  onAutoChange: (on: boolean) => void;
   onComplete: (id: string) => void;
   onTrainingChange: (training: boolean) => void;
 }
 
-export default function Workout({ exercise, category, next, onNext, onComplete, onTrainingChange }: Props) {
+export default function Workout({ exercise, category, next, onNext, onComplete, onTrainingChange, autoStart, auto, onAutoChange }: Props) {
   const { t: ui, content } = useI18n(); // `t` below is the interval timer, so the UI strings are `ui`
   const levels = content.levels;
 
@@ -44,6 +47,35 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
 
   const t = useIntervalTimer({ work: exercise.work, rest: exercise.rest, sets: exercise.sets, prep: PREP, sound: true });
 
+  // People who ask for reduced motion get a still figure until the exercise actually starts.
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Arrived via auto-continue: start the get-ready countdown straight away.
+  useEffect(() => {
+    if (autoStart) t.start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Finished and auto-continue is on: count down, then move on and start the next exercise.
+  const [cd, setCd] = useState<number | null>(null);
+  useEffect(() => {
+    if (!(t.status === "done" && auto && next)) { setCd(null); return; }
+    let n = 3;
+    setCd(n);
+    const id = window.setInterval(() => {
+      n -= 1;
+      if (n <= 0) { window.clearInterval(id); setCd(null); onNext(true); } else setCd(n);
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [t.status, auto, next, onNext]);
+
   // Lets the shell slide the catalog shut while an exercise is in progress.
   const active = t.status !== "idle";
   useEffect(() => {
@@ -58,7 +90,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
   const prepping = t.phase === "prep" && t.status !== "idle" && t.status !== "done";
   const resting = t.phase === "rest" && t.status !== "done";
   const urgent = running && secs >= 1 && secs <= 3;
-  const playing = t.status === "idle" || (running && t.phase === "work");
+  const playing = (t.status === "idle" && !reduceMotion) || (running && t.phase === "work");
   const hold = t.status === "done" || prepping || resting;
 
   const tone = urgent
@@ -129,9 +161,19 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
             </p>
             <h2 className="truncate font-display text-xl font-bold tracking-tight text-zinc-50 sm:text-2xl">{exercise.name}</h2>
           </div>
-          <p className="shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
-            {ui.summary(exercise.sets, exercise.work, exercise.rest)}
-          </p>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <p className="rounded-full bg-white/5 px-2.5 py-1 text-xs tabular-nums text-zinc-200">
+              {ui.summary(exercise.sets, exercise.work, exercise.rest)}
+            </p>
+            <button
+              type="button"
+              aria-pressed={auto}
+              onClick={() => onAutoChange(!auto)}
+              className={`btn btn-secondary btn-sm ${auto ? "btn-on" : ""}`}
+            >
+              {ui.autoNext}
+            </button>
+          </div>
         </header>
 
         <div className="grid grid-cols-5 items-center gap-2 md:min-h-0 md:flex-1 md:grid-cols-[minmax(0,1fr)_14rem] lg:grid-cols-[minmax(0,1fr)_16rem] md:grid-rows-[minmax(0,1fr)] md:gap-6">
@@ -214,7 +256,7 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </button>
           <button
             type="button"
-            onClick={onNext}
+            onClick={() => onNext(false)}
             disabled={!next}
             aria-label={t.status === "done" && next ? ui.nextExercise(next.name) : ui.skipToNext}
             title={t.status === "done" && next ? ui.nextExercise(next.name) : ui.skipToNext}
@@ -224,7 +266,9 @@ export default function Workout({ exercise, category, next, onNext, onComplete, 
           </button>
         </div>
         <p className="sr-only" aria-live="polite">{ui.live(label, t.set, exercise.sets, side)}</p>
-        <p className="mt-2 hidden shrink-0 text-center text-xs text-zinc-400 lg:block">{ui.spaceHint}</p>
+        <p className="mt-2 min-h-4 shrink-0 text-center text-xs text-zinc-400" aria-live="polite">
+          {cd !== null && next ? <span className="text-work">{ui.autoNextIn(next.name, cd)}</span> : <span className="hidden lg:inline">{ui.spaceHint}</span>}
+        </p>
       </section>
 
       <Guide exercise={exercise} />
