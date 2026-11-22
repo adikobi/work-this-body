@@ -2,6 +2,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cues, unlockAudio } from "@/lib/audio";
 
+// Short haptic pulse on phones that support it (ignored elsewhere). Follows the sound setting.
+const buzz = (pattern: number | number[]) => { try { navigator.vibrate?.(pattern); } catch { /* ignore */ } };
+
 export type Status = "idle" | "running" | "paused" | "done";
 export type Phase = "prep" | "work" | "rest";
 export interface Snap { status: Status; phase: Phase; set: number; remainingMs: number }
@@ -44,7 +47,7 @@ export function useIntervalTimer(cfg: Cfg) {
     const dur = c.work * 1000;
     endRef.current = Date.now() + dur;
     lastSecRef.current = Math.ceil(dur / 1000);
-    if (c.sound) cues.phase();
+    if (c.sound) { cues.phase(); buzz(120); }
     commit({ status: s.status, phase: "work", set: s.set + 1, remainingMs: dur });
   }, [commit]);
 
@@ -64,7 +67,7 @@ export function useIntervalTimer(cfg: Cfg) {
         const sec = Math.ceil(rem / 1000);
         if (sec !== lastSecRef.current) {
           lastSecRef.current = sec;
-          if (sec <= 3 && c.sound) cues.tick();
+          if (sec <= 3 && c.sound) { cues.tick(); buzz(30); }
         }
         commit({ ...s, remainingMs: rem });
         return;
@@ -79,28 +82,35 @@ export function useIntervalTimer(cfg: Cfg) {
       };
 
       if (s.phase === "prep") {
-        if (c.sound) cues.phase();
+        if (c.sound) { cues.phase(); buzz(120); }
         begin("work", 1);
         return;
       }
       if (s.phase === "work" && s.set >= c.sets) {
-        if (c.sound) cues.done();
+        if (c.sound) { cues.done(); buzz([150, 80, 150, 80, 250]); }
         commit({ status: "done", phase: "work", set: c.sets, remainingMs: 0 });
         return;
       }
-      if (c.sound) cues.phase();
+      if (c.sound) { cues.phase(); buzz(120); }
       if (s.phase === "work") c.rest > 0 ? begin("rest", s.set) : begin("work", s.set + 1);
       else begin("work", s.set + 1);
     };
 
     const id = window.setInterval(tick, 100);
 
-    // Keep the screen awake mid-set (best effort).
+    // Keep the screen awake mid-set (best effort). The browser drops the lock when the tab is hidden, so take it again on return.
     let lock: { release: () => Promise<void> } | null = null;
     const wl = (navigator as unknown as { wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } }).wakeLock;
-    wl?.request("screen").then((l) => { lock = l; }).catch(() => {});
+    const acquire = () => { wl?.request("screen").then((l) => { lock = l; }).catch(() => {}); };
+    const onVisible = () => { if (document.visibilityState === "visible") acquire(); };
+    acquire();
+    document.addEventListener("visibilitychange", onVisible);
 
-    return () => { window.clearInterval(id); void lock?.release().catch(() => {}); };
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+      void lock?.release().catch(() => {});
+    };
   }, [snap.status, commit]);
 
   return { ...snap, start, pause, reset, skipRest };
