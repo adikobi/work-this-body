@@ -2,16 +2,29 @@ import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
 
-// Lets people install the app to a phone or tablet home screen and open it full-screen.
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "work-this-body",
     short_name: "work-this-body",
     description: "Guided mobility and strength with an interval timer and a live motion guide.",
     start_url: "./",
+    scope: "./",
     display: "standalone",
     background_color: "#070908",
     theme_color: "#070908",
-    icons: [{ src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" }],
+    icons: [
+      {
+        src: "./icon-192.png",
+        sizes: "192x192",
+        type: "image/png",
+        purpose: "any",
+      },
+      {
+        src: "./icon-512.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "any",
+      },
+    ],
   };
 }
