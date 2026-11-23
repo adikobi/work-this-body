@@ -32,6 +32,18 @@ const heebo = Heebo({
 export const metadata: Metadata = {
   title: messages[defaultLocale].meta.title,
   description: messages[defaultLocale].meta.description,
+  icons: {
+    icon: [
+      { url: "./icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "./icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "./icon-192.png",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "work-this-body",
+  },
 };
 
 export const viewport: Viewport = {
